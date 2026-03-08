@@ -15,6 +15,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Landing from "./pages/Landing";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Departments from "./pages/Departments";
@@ -69,6 +71,8 @@ const App = () => (
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/landing" element={<Landing />} />
+                <Route path="/subscription-success" element={<SubscriptionSuccess />} />
 
                 {/* HR/Admin routes */}
                 <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
