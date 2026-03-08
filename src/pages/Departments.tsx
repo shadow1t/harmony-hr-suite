@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, Building2, Trash2, Pencil } from "lucide-react";
+import { Plus, Building2, Trash2, Pencil, GitBranch } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Departments() {
   const { language } = useLanguage();
