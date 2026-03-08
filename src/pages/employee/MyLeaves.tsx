@@ -27,6 +27,7 @@ export default function MyLeaves() {
   const { user } = useAuth();
   const { companyId } = useCompany();
   const [employeeId, setEmployeeId] = useState<string | null>(null);
+  const [employeeName, setEmployeeName] = useState("");
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -36,10 +37,13 @@ export default function MyLeaves() {
     if (!user || !companyId) return null;
     const { data } = await supabase
       .from("employees")
-      .select("id")
+      .select("id, first_name_ar, last_name_ar, first_name_en, last_name_en")
       .eq("user_id", user.id)
       .eq("company_id", companyId)
       .single();
+    if (data) {
+      setEmployeeName(language === "ar" ? `${data.first_name_ar} ${data.last_name_ar}` : `${data.first_name_en || data.first_name_ar} ${data.last_name_en || data.last_name_ar}`);
+    }
     return data?.id || null;
   };
 
@@ -81,8 +85,18 @@ export default function MyLeaves() {
       days_count: days,
       reason: form.reason || null,
     });
-    if (error) toast.error(error.message);
-    else {
+    if (error) {
+      toast.error(error.message);
+    } else {
+      // Send notification to HR
+      await supabase.from("notifications").insert({
+        company_id: companyId,
+        title: language === "ar" ? "طلب إجازة جديد" : "New Leave Request",
+        message: language === "ar"
+          ? `${employeeName} قدم طلب إجازة من ${form.start_date} إلى ${form.end_date}`
+          : `${employeeName} submitted a leave request from ${form.start_date} to ${form.end_date}`,
+      });
+
       toast.success(language === "ar" ? "تم تقديم الطلب بنجاح" : "Request submitted");
       setDialogOpen(false);
       setForm({ leave_type: "annual", start_date: "", end_date: "", reason: "" });
