@@ -134,10 +134,6 @@
     font-family: 'Inter', sans-serif;
   }
 
-  /* Ensure proper RTL/LTR flipping for logical properties */
-  [dir="rtl"] .me-2 { margin-left: 0.5rem; margin-right: 0; }
-  [dir="rtl"] .ms-2 { margin-right: 0.5rem; margin-left: 0; }
-
   /* Responsive table scrolling */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;

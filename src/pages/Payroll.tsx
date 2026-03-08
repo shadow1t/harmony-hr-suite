@@ -89,20 +89,20 @@ export default function Payroll() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2"><Wallet className="h-6 w-6" /> {language === "ar" ? "الرواتب" : "Payroll"}</h1>
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex flex-col gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><Wallet className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "الرواتب" : "Payroll"}</h1>
+        <div className="flex items-center gap-2 flex-wrap">
           <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
             <SelectContent>{months.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}</SelectContent>
           </Select>
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
             <SelectContent>{[2025, 2026, 2027].map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
           </Select>
-          <Button onClick={generatePayroll}><Play className="h-4 w-4 me-2" />{language === "ar" ? "إنشاء المسيّر" : "Generate"}</Button>
+          <Button size="sm" onClick={generatePayroll}><Play className="h-4 w-4 me-2" />{language === "ar" ? "إنشاء المسيّر" : "Generate"}</Button>
           {payrolls.length > 0 && (
-            <Button variant="outline" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
+            <Button variant="outline" size="sm" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
           )}
         </div>
       </div>

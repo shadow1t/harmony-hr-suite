@@ -84,41 +84,43 @@ export default function Leaves() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2"><CalendarDays className="h-6 w-6" /> {language === "ar" ? "إدارة الإجازات" : "Leave Management"}</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 me-2" />{language === "ar" ? "طلب إجازة" : "Request Leave"}</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{language === "ar" ? "طلب إجازة جديد" : "New Leave Request"}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div>
-                <Label>{language === "ar" ? "الموظف" : "Employee"}</Label>
-                <Select value={form.employee_id} onValueChange={(v) => setForm({ ...form, employee_id: v })}>
-                  <SelectTrigger><SelectValue placeholder={language === "ar" ? "اختر" : "Select"} /></SelectTrigger>
-                  <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {empName(e)}</SelectItem>)}</SelectContent>
-                </Select>
+      <div className="flex flex-col gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><CalendarDays className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "إدارة الإجازات" : "Leave Management"}</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 me-2" />{language === "ar" ? "طلب إجازة" : "Request Leave"}</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>{language === "ar" ? "طلب إجازة جديد" : "New Leave Request"}</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <div>
+                  <Label>{language === "ar" ? "الموظف" : "Employee"}</Label>
+                  <Select value={form.employee_id} onValueChange={(v) => setForm({ ...form, employee_id: v })}>
+                    <SelectTrigger><SelectValue placeholder={language === "ar" ? "اختر" : "Select"} /></SelectTrigger>
+                    <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {empName(e)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{language === "ar" ? "نوع الإجازة" : "Leave Type"}</Label>
+                  <Select value={form.leave_type} onValueChange={(v) => setForm({ ...form, leave_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["annual", "sick", "emergency", "unpaid", "maternity", "paternity"].map((t) => (
+                        <SelectItem key={t} value={t}>{leaveTypeLabel(t)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>{language === "ar" ? "من" : "From"}</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
+                  <div><Label>{language === "ar" ? "إلى" : "To"}</Label><Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} /></div>
+                </div>
+                {form.start_date && form.end_date && <p className="text-sm text-muted-foreground">{language === "ar" ? "عدد الأيام:" : "Days:"} {calcDays(form.start_date, form.end_date)}</p>}
+                <div><Label>{language === "ar" ? "السبب" : "Reason"}</Label><Textarea value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} /></div>
+                <Button onClick={handleAdd} className="w-full">{language === "ar" ? "تقديم الطلب" : "Submit"}</Button>
               </div>
-              <div>
-                <Label>{language === "ar" ? "نوع الإجازة" : "Leave Type"}</Label>
-                <Select value={form.leave_type} onValueChange={(v) => setForm({ ...form, leave_type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["annual", "sick", "emergency", "unpaid", "maternity", "paternity"].map((t) => (
-                      <SelectItem key={t} value={t}>{leaveTypeLabel(t)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>{language === "ar" ? "من" : "From"}</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
-                <div><Label>{language === "ar" ? "إلى" : "To"}</Label><Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} /></div>
-              </div>
-              {form.start_date && form.end_date && <p className="text-sm text-muted-foreground">{language === "ar" ? "عدد الأيام:" : "Days:"} {calcDays(form.start_date, form.end_date)}</p>}
-              <div><Label>{language === "ar" ? "السبب" : "Reason"}</Label><Textarea value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} /></div>
-              <Button onClick={handleAdd} className="w-full">{language === "ar" ? "تقديم الطلب" : "Submit"}</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
