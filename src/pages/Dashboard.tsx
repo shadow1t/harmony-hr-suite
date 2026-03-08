@@ -22,7 +22,7 @@ interface StatCardProps {
   trend?: string;
 }
 
-function StatCard({ title, value, icon: Icon, trend }: StatCardProps) {
+const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(({ title, value, icon: Icon, trend }, ref) => {
   return (
     <Card>
       <CardContent className="p-3 sm:p-6">
