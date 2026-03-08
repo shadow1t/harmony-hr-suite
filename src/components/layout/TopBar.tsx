@@ -1,4 +1,4 @@
-import { Globe, Bell, LogOut, User } from "lucide-react";
+import { Globe, Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -53,7 +53,6 @@ export function TopBar() {
     };
     fetchNotifications();
 
-    // Subscribe to new notifications
     const channel = supabase
       .channel("notifications")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications" }, () => {
@@ -89,28 +88,28 @@ export function TopBar() {
     : user?.email?.[0]?.toUpperCase() || 'U';
 
   return (
-    <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4 gap-4">
+    <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 gap-2 sm:gap-4">
       <div className="flex items-center gap-2">
         <SidebarTrigger />
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={toggleLanguage} title={t('language.switch')}>
+      <div className="flex items-center gap-1 sm:gap-2">
+        <Button variant="ghost" size="icon" onClick={toggleLanguage} title={t('language.switch')} className="h-8 w-8 sm:h-9 sm:w-9">
           <Globe className="h-4 w-4" />
         </Button>
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-9 sm:w-9">
               <Bell className="h-4 w-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
+                <span className="absolute -top-0.5 -end-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
+          <PopoverContent className="w-72 sm:w-80 p-0" align="end">
             <div className="flex items-center justify-between p-3 border-b border-border">
               <span className="font-semibold text-sm">{language === "ar" ? "الإشعارات" : "Notifications"}</span>
               {unreadCount > 0 && (
@@ -146,8 +145,8 @@ export function TopBar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-9 gap-2 px-2">
-              <Avatar className="h-7 w-7">
+            <Button variant="ghost" className="h-8 sm:h-9 gap-2 px-1.5 sm:px-2">
+              <Avatar className="h-6 w-6 sm:h-7 sm:w-7">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
               </Avatar>
             </Button>
