@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { PageBreadcrumb } from "@/components/ui/page-breadcrumb";
 import { toast } from "sonner";
 import { Plus, CalendarDays, Check, X, Pencil, Trash2, Clock, CheckCircle, XCircle } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
@@ -107,6 +108,7 @@ export default function Leaves() {
 
   return (
     <div className="space-y-6">
+      <PageBreadcrumb />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={CalendarDays} label={language === "ar" ? "إجمالي الطلبات" : "Total Requests"} value={requests.length} />
         <StatCard icon={Clock} label={language === "ar" ? "معلق" : "Pending"} value={pendingCount} color="text-yellow-600" />
@@ -161,7 +163,8 @@ export default function Leaves() {
             <EmptyState icon={CalendarDays} title={language === "ar" ? "لا توجد طلبات" : "No requests"} description={language === "ar" ? "قم بإنشاء طلب إجازة جديد" : "Create a new leave request"} actionLabel={language === "ar" ? "طلب إجازة" : "Request Leave"} onAction={openAdd} />
           ) : (
             <>
-              <div className="overflow-x-auto -mx-6 px-6">
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto -mx-6 px-6">
                 <div className="min-w-[800px]">
                   <Table>
                     <TableHeader>
@@ -202,6 +205,37 @@ export default function Leaves() {
                   </Table>
                 </div>
               </div>
+
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-3">
+                {pagination.items.map((r: any) => (
+                  <div key={r.id} className="border rounded-lg p-3 space-y-2 bg-card">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">{r.employees ? empName(r.employees) : "-"}</p>
+                        <p className="text-xs text-muted-foreground">{leaveTypeLabel(r.leave_type)}</p>
+                      </div>
+                      {statusBadge(r.status)}
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div><span className="text-muted-foreground">{language === "ar" ? "من" : "From"}</span><p className="font-medium">{r.start_date}</p></div>
+                      <div><span className="text-muted-foreground">{language === "ar" ? "إلى" : "To"}</span><p className="font-medium">{r.end_date}</p></div>
+                      <div><span className="text-muted-foreground">{language === "ar" ? "الأيام" : "Days"}</span><p className="font-medium">{r.days_count}</p></div>
+                    </div>
+                    <div className="flex gap-1 pt-1 border-t flex-wrap">
+                      {r.status === "pending" && (
+                        <>
+                          <Button size="sm" variant="ghost" onClick={() => updateStatus(r.id, "approved")}><Check className="h-3.5 w-3.5 me-1 text-green-600" />{language === "ar" ? "قبول" : "Approve"}</Button>
+                          <Button size="sm" variant="ghost" onClick={() => updateStatus(r.id, "rejected")}><X className="h-3.5 w-3.5 me-1 text-destructive" />{language === "ar" ? "رفض" : "Reject"}</Button>
+                        </>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(r)}><Pencil className="h-3.5 w-3.5 me-1" />{language === "ar" ? "تعديل" : "Edit"}</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteId(r.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5 me-1" />{language === "ar" ? "حذف" : "Delete"}</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <TablePagination {...pagination} language={language} />
             </>
           )}
