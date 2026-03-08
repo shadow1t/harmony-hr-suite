@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { Plus, GraduationCap, Calendar, Pencil, Trash2, UserPlus, Users, BookOpen } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { PageBreadcrumb } from "@/components/ui/page-breadcrumb";
 
 export default function Training() {
   const { language } = useLanguage();
