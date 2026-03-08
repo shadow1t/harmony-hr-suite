@@ -25,15 +25,15 @@ interface StatCardProps {
 function StatCard({ title, value, icon: Icon, trend }: StatCardProps) {
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
+      <CardContent className="p-3 sm:p-6">
+        <div className="flex items-center justify-between gap-2">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">{title}</p>
+            <p className="text-lg sm:text-2xl font-bold">{value}</p>
             {trend && <p className="text-xs text-accent">{trend}</p>}
           </div>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-            <Icon className="h-6 w-6 text-primary" />
+          <div className="flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+            <Icon className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
           </div>
         </div>
       </CardContent>
@@ -110,13 +110,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
-        <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
+        <h1 className="text-xl sm:text-2xl font-bold">{t('dashboard.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('dashboard.welcome')}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((stat) => <StatCard key={stat.title} {...stat} />)}
       </div>
 

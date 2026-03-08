@@ -90,7 +90,7 @@ export default function MyPortal() {
         {language === "ar" ? "بوابتي" : "My Portal"}
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {widgets.map((w, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
