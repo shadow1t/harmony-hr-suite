@@ -128,39 +128,43 @@ export default function Leaves() {
           {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : requests.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد طلبات" : "No requests"}</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
-                  <TableHead>{language === "ar" ? "النوع" : "Type"}</TableHead>
-                  <TableHead>{language === "ar" ? "من" : "From"}</TableHead>
-                  <TableHead>{language === "ar" ? "إلى" : "To"}</TableHead>
-                  <TableHead>{language === "ar" ? "الأيام" : "Days"}</TableHead>
-                  <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                  <TableHead>{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {requests.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
-                    <TableCell>{leaveTypeLabel(r.leave_type)}</TableCell>
-                    <TableCell>{r.start_date}</TableCell>
-                    <TableCell>{r.end_date}</TableCell>
-                    <TableCell>{r.days_count}</TableCell>
-                    <TableCell>{statusBadge(r.status)}</TableCell>
-                    <TableCell>
-                      {r.status === "pending" && (
-                        <div className="flex gap-1">
-                          <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "approved")}><Check className="h-4 w-4 text-green-600" /></Button>
-                          <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "rejected")}><X className="h-4 w-4 text-destructive" /></Button>
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto -mx-6 px-6">
+              <div className="min-w-[700px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
+                      <TableHead>{language === "ar" ? "النوع" : "Type"}</TableHead>
+                      <TableHead>{language === "ar" ? "من" : "From"}</TableHead>
+                      <TableHead>{language === "ar" ? "إلى" : "To"}</TableHead>
+                      <TableHead>{language === "ar" ? "الأيام" : "Days"}</TableHead>
+                      <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                      <TableHead>{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {requests.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
+                        <TableCell>{leaveTypeLabel(r.leave_type)}</TableCell>
+                        <TableCell>{r.start_date}</TableCell>
+                        <TableCell>{r.end_date}</TableCell>
+                        <TableCell>{r.days_count}</TableCell>
+                        <TableCell>{statusBadge(r.status)}</TableCell>
+                        <TableCell>
+                          {r.status === "pending" && (
+                            <div className="flex gap-1">
+                              <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "approved")}><Check className="h-4 w-4 text-green-600" /></Button>
+                              <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "rejected")}><X className="h-4 w-4 text-destructive" /></Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

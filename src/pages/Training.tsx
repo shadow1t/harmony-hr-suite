@@ -44,8 +44,8 @@ export default function Training() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold flex items-center gap-2"><GraduationCap className="h-6 w-6" /> {language === "ar" ? "التدريب" : "Training"}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "التدريب" : "Training"}</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 me-2" />{language === "ar" ? "دورة جديدة" : "New Course"}</Button></DialogTrigger>
           <DialogContent>
