@@ -102,7 +102,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-sidebar-foreground">{t('app.name')}</span>
+              <span className="text-sm font-semibold text-sidebar-foreground">{company?.name_en || t('app.name')}</span>
             </div>
           )}
         </div>
