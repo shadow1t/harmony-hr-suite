@@ -136,8 +136,20 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {isSuperAdmin && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <NavLink to="/admin" className="hover:bg-sidebar-accent/50 text-destructive">
+                  <Shield className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span>Platform Admin</span>}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <div className="px-2 py-2 text-xs text-sidebar-foreground/50">
-          {!collapsed && "© 2026 HR System"}
+          {!collapsed && "© 2026 HR SaaS Platform"}
         </div>
       </SidebarFooter>
     </Sidebar>
