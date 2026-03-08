@@ -16,6 +16,8 @@ import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
 import { Plus, Clock, Pencil, Trash2, Users, UserX, AlertTriangle } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { StatsSkeleton, TableSkeleton } from "@/components/ui/page-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function Attendance() {
   const { language } = useLanguage();
