@@ -10,10 +10,12 @@ import {
   Building2,
   FileText,
   Settings,
+  Shield,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import {
   Sidebar,
   SidebarContent,
