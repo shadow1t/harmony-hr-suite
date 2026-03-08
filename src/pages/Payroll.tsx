@@ -132,30 +132,34 @@ export default function Payroll() {
               <Button variant="outline" onClick={generatePayroll}>{language === "ar" ? "إنشاء الآن" : "Generate Now"}</Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
-                  <TableHead>{language === "ar" ? "الأساسي" : "Basic"}</TableHead>
-                  <TableHead>{language === "ar" ? "البدلات" : "Allowances"}</TableHead>
-                  <TableHead>{language === "ar" ? "التأمينات" : "Insurance"}</TableHead>
-                  <TableHead>{language === "ar" ? "الصافي" : "Net"}</TableHead>
-                  <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payrolls.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.employees ? empName(p.employees) : "-"}</TableCell>
-                    <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
-                    <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
-                    <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
-                    <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
-                    <TableCell><Badge variant={p.status === "paid" ? "default" : "secondary"}>{p.status}</Badge></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto -mx-6 px-6">
+              <div className="min-w-[700px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
+                      <TableHead>{language === "ar" ? "الأساسي" : "Basic"}</TableHead>
+                      <TableHead>{language === "ar" ? "البدلات" : "Allowances"}</TableHead>
+                      <TableHead>{language === "ar" ? "التأمينات" : "Insurance"}</TableHead>
+                      <TableHead>{language === "ar" ? "الصافي" : "Net"}</TableHead>
+                      <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payrolls.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">{p.employees ? empName(p.employees) : "-"}</TableCell>
+                        <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
+                        <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
+                        <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
+                        <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
+                        <TableCell><Badge variant={p.status === "paid" ? "default" : "secondary"}>{p.status}</Badge></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

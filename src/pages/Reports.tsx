@@ -51,11 +51,11 @@ export default function Reports() {
     <div className="space-y-6">
       <h1 className="text-xl sm:text-2xl font-bold">{language === "ar" ? "التقارير" : "Reports"}</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card><CardContent className="p-6 flex items-center gap-3"><Users className="h-8 w-8 text-primary" /><div><p className="text-sm text-muted-foreground">{language === "ar" ? "الموظفون" : "Employees"}</p><p className="text-2xl font-bold">{stats.employees}</p></div></CardContent></Card>
-        <Card><CardContent className="p-6 flex items-center gap-3"><Building2 className="h-8 w-8 text-primary" /><div><p className="text-sm text-muted-foreground">{language === "ar" ? "الأقسام" : "Departments"}</p><p className="text-2xl font-bold">{stats.departments}</p></div></CardContent></Card>
-        <Card><CardContent className="p-6 flex items-center gap-3"><CalendarDays className="h-8 w-8 text-primary" /><div><p className="text-sm text-muted-foreground">{language === "ar" ? "إجازات مقبولة" : "Approved Leaves"}</p><p className="text-2xl font-bold">{stats.activeLeaves}</p></div></CardContent></Card>
-        <Card><CardContent className="p-6 flex items-center gap-3"><Wallet className="h-8 w-8 text-primary" /><div><p className="text-sm text-muted-foreground">{language === "ar" ? "إجمالي الرواتب" : "Total Payroll"}</p><p className="text-2xl font-bold">{stats.totalPayroll.toLocaleString()}</p></div></CardContent></Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card><CardContent className="p-3 sm:p-6 flex items-center gap-3"><Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" /><div className="min-w-0"><p className="text-xs sm:text-sm text-muted-foreground truncate">{language === "ar" ? "الموظفون" : "Employees"}</p><p className="text-lg sm:text-2xl font-bold">{stats.employees}</p></div></CardContent></Card>
+        <Card><CardContent className="p-3 sm:p-6 flex items-center gap-3"><Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" /><div className="min-w-0"><p className="text-xs sm:text-sm text-muted-foreground truncate">{language === "ar" ? "الأقسام" : "Departments"}</p><p className="text-lg sm:text-2xl font-bold">{stats.departments}</p></div></CardContent></Card>
+        <Card><CardContent className="p-3 sm:p-6 flex items-center gap-3"><CalendarDays className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" /><div className="min-w-0"><p className="text-xs sm:text-sm text-muted-foreground truncate">{language === "ar" ? "إجازات مقبولة" : "Approved Leaves"}</p><p className="text-lg sm:text-2xl font-bold">{stats.activeLeaves}</p></div></CardContent></Card>
+        <Card><CardContent className="p-3 sm:p-6 flex items-center gap-3"><Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" /><div className="min-w-0"><p className="text-xs sm:text-sm text-muted-foreground truncate">{language === "ar" ? "إجمالي الرواتب" : "Total Payroll"}</p><p className="text-lg sm:text-2xl font-bold">{stats.totalPayroll.toLocaleString()}</p></div></CardContent></Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

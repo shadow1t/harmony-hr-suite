@@ -14,7 +14,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold flex items-center gap-2"><SettingsIcon className="h-6 w-6" /> {language === "ar" ? "الإعدادات" : "Settings"}</h1>
+      <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "الإعدادات" : "Settings"}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>

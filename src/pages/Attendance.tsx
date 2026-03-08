@@ -99,28 +99,32 @@ export default function Attendance() {
           {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : records.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد سجلات لهذا اليوم" : "No records for this date"}</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === "ar" ? "الرقم الوظيفي" : "ID"}</TableHead>
-                  <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
-                  <TableHead>{language === "ar" ? "الحضور" : "Check In"}</TableHead>
-                  <TableHead>{language === "ar" ? "الانصراف" : "Check Out"}</TableHead>
-                  <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {records.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono">{r.employees?.employee_number}</TableCell>
-                    <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
-                    <TableCell>{r.check_in ? new Date(r.check_in).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
-                    <TableCell>{r.check_out ? new Date(r.check_out).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
-                    <TableCell><Badge variant={statusColor(r.status) as any}>{r.status}</Badge></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto -mx-6 px-6">
+              <div className="min-w-[600px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{language === "ar" ? "الرقم الوظيفي" : "ID"}</TableHead>
+                      <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
+                      <TableHead>{language === "ar" ? "الحضور" : "Check In"}</TableHead>
+                      <TableHead>{language === "ar" ? "الانصراف" : "Check Out"}</TableHead>
+                      <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {records.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-mono">{r.employees?.employee_number}</TableCell>
+                        <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
+                        <TableCell>{r.check_in ? new Date(r.check_in).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
+                        <TableCell>{r.check_out ? new Date(r.check_out).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
+                        <TableCell><Badge variant={statusColor(r.status) as any}>{r.status}</Badge></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

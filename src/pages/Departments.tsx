@@ -61,7 +61,7 @@ export default function Departments() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{language === "ar" ? "الأقسام والفروع" : "Departments & Branches"}</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">{language === "ar" ? "الأقسام والفروع" : "Departments & Branches"}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Departments */}
