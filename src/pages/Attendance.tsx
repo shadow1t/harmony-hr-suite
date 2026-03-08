@@ -38,7 +38,7 @@ export default function Attendance() {
 
   const handleAdd = async () => {
     if (!form.employee_id) { toast.error(language === "ar" ? "اختر الموظف" : "Select employee"); return; }
-    const payload: any = { employee_id: form.employee_id, date: form.date, status: form.status };
+    const payload: any = { employee_id: form.employee_id, date: form.date, status: form.status, company_id: companyId };
     if (form.check_in) payload.check_in = `${form.date}T${form.check_in}:00`;
     if (form.check_out) payload.check_out = `${form.date}T${form.check_out}:00`;
     const { error } = await supabase.from("attendance").insert(payload);

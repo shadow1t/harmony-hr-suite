@@ -37,7 +37,7 @@ export default function Recruitment() {
 
   const handleAdd = async () => {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
-    const { error } = await supabase.from("job_postings").insert({ ...form, department_id: form.department_id || null });
+    const { error } = await supabase.from("job_postings").insert({ ...form, department_id: form.department_id || null, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إضافة الوظيفة" : "Job posted"); setDialogOpen(false); fetchData(); }
   };

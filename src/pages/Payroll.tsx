@@ -43,7 +43,7 @@ export default function Payroll() {
       const socialInsurance = basic * 0.0975;
       const net = gross - socialInsurance;
       return {
-        employee_id: e.id, month, year,
+        employee_id: e.id, month, year, company_id: companyId,
         basic_salary: basic, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         social_insurance: Math.round(socialInsurance * 100) / 100,
         net_salary: Math.round(net * 100) / 100,

@@ -44,7 +44,7 @@ export default function Departments() {
 
   const addBranch = async () => {
     if (!branchForm.name_ar || !branchForm.name_en) { toast.error(language === "ar" ? "يرجى تعبئة الاسم" : "Name required"); return; }
-    const { error } = await supabase.from("branches").insert(branchForm);
+    const { error } = await supabase.from("branches").insert({ ...branchForm, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إضافة الفرع" : "Branch added"); setBranchOpen(false); setBranchForm({ name_ar: "", name_en: "", city: "", address: "", phone: "" }); fetchData(); }
   };

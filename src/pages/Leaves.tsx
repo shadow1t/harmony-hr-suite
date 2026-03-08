@@ -46,7 +46,7 @@ export default function Leaves() {
   const handleAdd = async () => {
     if (!form.employee_id || !form.start_date || !form.end_date) { toast.error(language === "ar" ? "يرجى تعبئة جميع الحقول" : "Fill all fields"); return; }
     const days = calcDays(form.start_date, form.end_date);
-    const payload: any = { ...form, days_count: days };
+    const payload: any = { ...form, days_count: days, company_id: companyId };
     const { error } = await supabase.from("leave_requests").insert(payload);
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم تقديم الطلب" : "Request submitted"); setDialogOpen(false); fetchData(); }

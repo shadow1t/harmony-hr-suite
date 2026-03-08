@@ -33,6 +33,7 @@ export default function Training() {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
     const { error } = await supabase.from("training_courses").insert({
       ...form,
+      company_id: companyId,
       max_participants: form.max_participants ? parseInt(form.max_participants) : null,
       start_date: form.start_date || null,
       end_date: form.end_date || null,

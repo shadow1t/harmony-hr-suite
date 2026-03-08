@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { Plus, Search, Users } from "lucide-react";
 
 export default function Employees() {
   const { t, language } = useLanguage();
+  const { companyId } = useCompany();
   const [employees, setEmployees] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
@@ -21,24 +23,10 @@ export default function Employees() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({
-    employee_number: "",
-    first_name_ar: "",
-    last_name_ar: "",
-    first_name_en: "",
-    last_name_en: "",
-    email: "",
-    phone: "",
-    national_id: "",
-    nationality: "",
-    department_id: "",
-    branch_id: "",
-    position_ar: "",
-    position_en: "",
-    contract_type: "full_time",
-    hire_date: new Date().toISOString().split("T")[0],
-    basic_salary: "",
-    housing_allowance: "",
-    transport_allowance: "",
+    employee_number: "", first_name_ar: "", last_name_ar: "", first_name_en: "", last_name_en: "",
+    email: "", phone: "", national_id: "", nationality: "", department_id: "", branch_id: "",
+    position_ar: "", position_en: "", contract_type: "full_time",
+    hire_date: new Date().toISOString().split("T")[0], basic_salary: "", housing_allowance: "", transport_allowance: "",
   });
 
   const fetchData = async () => {
@@ -63,6 +51,7 @@ export default function Employees() {
     }
     const payload: any = {
       ...form,
+      company_id: companyId,
       basic_salary: parseFloat(form.basic_salary) || 0,
       housing_allowance: parseFloat(form.housing_allowance) || 0,
       transport_allowance: parseFloat(form.transport_allowance) || 0,
@@ -70,9 +59,8 @@ export default function Employees() {
       branch_id: form.branch_id || null,
     };
     const { error } = await supabase.from("employees").insert(payload);
-    if (error) {
-      toast.error(error.message);
-    } else {
+    if (error) { toast.error(error.message); }
+    else {
       toast.success(language === "ar" ? "تم إضافة الموظف بنجاح" : "Employee added successfully");
       setDialogOpen(false);
       setForm({ employee_number: "", first_name_ar: "", last_name_ar: "", first_name_en: "", last_name_en: "", email: "", phone: "", national_id: "", nationality: "", department_id: "", branch_id: "", position_ar: "", position_en: "", contract_type: "full_time", hire_date: new Date().toISOString().split("T")[0], basic_salary: "", housing_allowance: "", transport_allowance: "" });
