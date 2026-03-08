@@ -35,6 +35,7 @@ export default function Register() {
       toast.error(error.message);
     } else {
       toast.success(t('auth.registerSuccess'));
+      navigate('/');
     }
     setLoading(false);
   };
