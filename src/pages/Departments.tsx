@@ -13,6 +13,7 @@ import { Plus, Building2, Trash2 } from "lucide-react";
 
 export default function Departments() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [departments, setDepartments] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
