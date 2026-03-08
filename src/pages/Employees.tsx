@@ -114,13 +114,13 @@ export default function Employees() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{t("employees.title")}</h1>
-          <p className="text-muted-foreground flex items-center gap-1"><Users className="h-4 w-4" /> {filtered.length} {language === "ar" ? "موظف" : "employees"}</p>
+          <h1 className="text-xl sm:text-2xl font-bold">{t("employees.title")}</h1>
+          <p className="text-muted-foreground flex items-center gap-1 text-sm"><Users className="h-4 w-4" /> {filtered.length} {language === "ar" ? "موظف" : "employees"}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
