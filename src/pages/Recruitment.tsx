@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, UserPlus, Briefcase, Pencil, Trash2 } from "lucide-react";
+import { Plus, UserPlus, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 
 export default function Recruitment() {
   const { language } = useLanguage();
@@ -53,7 +53,6 @@ export default function Recruitment() {
   const handleSave = async () => {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
     const payload = { ...form, department_id: form.department_id || null, closing_date: form.closing_date || null, company_id: companyId };
-
     if (editingId) {
       const { error } = await supabase.from("job_postings").update(payload).eq("id", editingId);
       if (error) { toast.error(error.message); return; }
@@ -72,6 +71,13 @@ export default function Recruitment() {
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم الحذف" : "Deleted"); fetchData(); }
     setDeleteId(null);
+  };
+
+  const toggleStatus = async (id: string, current: string) => {
+    const newStatus = current === "open" ? "closed" : "open";
+    const { error } = await supabase.from("job_postings").update({ status: newStatus }).eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success(language === "ar" ? "تم تحديث الحالة" : "Status updated"); fetchData(); }
   };
 
   return (
@@ -102,15 +108,11 @@ export default function Recruitment() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}
         title={language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
         description={language === "ar" ? "هل أنت متأكد من حذف هذه الوظيفة؟" : "Are you sure you want to delete this job posting?"}
-        confirmLabel={language === "ar" ? "حذف" : "Delete"}
-        cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
-        onConfirm={handleDelete}
-      />
+        confirmLabel={language === "ar" ? "حذف" : "Delete"} cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
+        onConfirm={handleDelete} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? <p className="col-span-full text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : jobs.length === 0 ? (
@@ -130,7 +132,10 @@ export default function Recruitment() {
               <p className="text-sm text-muted-foreground mb-2">{j.departments ? (language === "ar" ? j.departments.name_ar : j.departments.name_en) : ""}</p>
               <p className="text-sm line-clamp-2">{language === "ar" ? j.description_ar : (j.description_en || j.description_ar)}</p>
               {j.closing_date && <p className="text-xs text-muted-foreground mt-2">{language === "ar" ? "يغلق:" : "Closes:"} {j.closing_date}</p>}
-              <div className="flex gap-1 mt-3 border-t pt-3">
+              <div className="flex gap-1 mt-3 border-t pt-3 flex-wrap">
+                <Button variant="ghost" size="sm" onClick={() => toggleStatus(j.id, j.status)}>
+                  {j.status === "open" ? <><ToggleRight className="h-4 w-4 me-1" />{language === "ar" ? "إغلاق" : "Close"}</> : <><ToggleLeft className="h-4 w-4 me-1" />{language === "ar" ? "فتح" : "Reopen"}</>}
+                </Button>
                 <Button variant="ghost" size="sm" onClick={() => openEdit(j)}><Pencil className="h-4 w-4 me-1" />{language === "ar" ? "تعديل" : "Edit"}</Button>
                 <Button variant="ghost" size="sm" onClick={() => setDeleteId(j.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4 me-1" />{language === "ar" ? "حذف" : "Delete"}</Button>
               </div>
