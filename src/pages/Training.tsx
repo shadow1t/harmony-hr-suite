@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, GraduationCap, Calendar, Pencil, Trash2, UserPlus, Users } from "lucide-react";
+import { Plus, GraduationCap, Calendar, Pencil, Trash2, UserPlus, Users, BookOpen } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Training() {
   const { language } = useLanguage();
@@ -107,8 +108,17 @@ export default function Training() {
   const getEnrollmentCount = (courseId: string) => enrollments.filter(e => e.course_id === courseId).length;
   const getCourseEnrollments = (courseId: string) => enrollments.filter(e => e.course_id === courseId);
 
+  const scheduledCourses = courses.filter(c => c.status === "scheduled").length;
+  const completedEnrolls = enrollments.filter(e => e.status === "completed").length;
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard icon={BookOpen} label={language === "ar" ? "الدورات" : "Courses"} value={courses.length} />
+        <StatCard icon={Calendar} label={language === "ar" ? "مجدولة" : "Scheduled"} value={scheduledCourses} color="text-yellow-600" />
+        <StatCard icon={Users} label={language === "ar" ? "التسجيلات" : "Enrollments"} value={enrollments.length} color="text-primary" />
+        <StatCard icon={GraduationCap} label={language === "ar" ? "مكتملة" : "Completed"} value={completedEnrolls} color="text-green-600" />
+      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "التدريب" : "Training"}</h1>
         <Button onClick={openAdd}><Plus className="h-4 w-4 me-2" />{language === "ar" ? "دورة جديدة" : "New Course"}</Button>

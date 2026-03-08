@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, UserPlus, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, UserPlus, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight, DoorOpen, DoorClosed } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Recruitment() {
   const { language } = useLanguage();
@@ -77,8 +78,16 @@ export default function Recruitment() {
     else { toast.success(language === "ar" ? "تم تحديث الحالة" : "Status updated"); fetchData(); }
   };
 
+  const openJobs = jobs.filter(j => j.status === "open").length;
+  const closedJobs = jobs.filter(j => j.status === "closed").length;
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <StatCard icon={Briefcase} label={language === "ar" ? "إجمالي الوظائف" : "Total Jobs"} value={jobs.length} />
+        <StatCard icon={DoorOpen} label={language === "ar" ? "مفتوح" : "Open"} value={openJobs} color="text-green-600" />
+        <StatCard icon={DoorClosed} label={language === "ar" ? "مغلق" : "Closed"} value={closedJobs} color="text-muted-foreground" />
+      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><UserPlus className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "التوظيف" : "Recruitment"}</h1>
         <Button onClick={openAdd}><Plus className="h-4 w-4 me-2" />{language === "ar" ? "وظيفة جديدة" : "New Job"}</Button>

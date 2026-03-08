@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, Building2, Trash2, Pencil } from "lucide-react";
+import { Plus, Building2, Trash2, Pencil, GitBranch } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Departments() {
   const { language } = useLanguage();
@@ -96,6 +97,10 @@ export default function Departments() {
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-3">
+        <StatCard icon={Building2} label={language === "ar" ? "الأقسام" : "Departments"} value={departments.length} />
+        <StatCard icon={GitBranch} label={language === "ar" ? "الفروع" : "Branches"} value={branches.length} />
+      </div>
       <h1 className="text-xl sm:text-2xl font-bold">{language === "ar" ? "الأقسام والفروع" : "Departments & Branches"}</h1>
 
       <Dialog open={deptOpen} onOpenChange={setDeptOpen}>
