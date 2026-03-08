@@ -43,7 +43,7 @@ export default function TenantsManagement() {
   };
 
   const changePlan = async (id: string, plan: string) => {
-    const { error } = await supabase.from("companies").update({ subscription_plan: plan }).eq("id", id);
+    const { error } = await supabase.from("companies").update({ subscription_plan: plan as any }).eq("id", id);
     if (error) toast.error(error.message);
     else {
       toast.success(language === "ar" ? "تم تحديث الباقة" : "Plan updated");
