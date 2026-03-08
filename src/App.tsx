@@ -104,11 +104,12 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </CompanyProvider>
-      </AuthProvider>
-    </LanguageProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CompanyProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
