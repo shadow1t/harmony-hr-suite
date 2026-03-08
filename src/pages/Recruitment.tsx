@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, UserPlus, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, UserPlus, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight, DoorOpen, DoorClosed } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Recruitment() {
   const { language } = useLanguage();
