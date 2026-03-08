@@ -61,13 +61,15 @@ const AdminPage = ({ children }: { children: React.ReactNode }) => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <CompanyProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <LanguageProvider>
+        <AuthProvider>
+          <CompanyProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <GlobalSearch />
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
