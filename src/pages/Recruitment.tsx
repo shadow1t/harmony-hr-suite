@@ -15,6 +15,7 @@ import { Plus, UserPlus, Briefcase } from "lucide-react";
 
 export default function Recruitment() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [jobs, setJobs] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
