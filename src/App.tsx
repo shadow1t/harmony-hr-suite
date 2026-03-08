@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CompanyProvider } from "@/hooks/useCompany";
+import { ThemeProvider } from "next-themes";
+import { GlobalSearch } from "@/components/ui/global-search";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminProtectedRoute } from "@/components/admin/AdminProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -59,13 +61,15 @@ const AdminPage = ({ children }: { children: React.ReactNode }) => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <CompanyProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <LanguageProvider>
+        <AuthProvider>
+          <CompanyProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <GlobalSearch />
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -100,11 +104,12 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </CompanyProvider>
-      </AuthProvider>
-    </LanguageProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CompanyProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

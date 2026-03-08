@@ -16,6 +16,8 @@ import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
 import { Plus, Clock, Pencil, Trash2, Users, UserX, AlertTriangle } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { StatsSkeleton, TableSkeleton } from "@/components/ui/page-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function Attendance() {
   const { language } = useLanguage();
@@ -147,8 +149,8 @@ export default function Attendance() {
 
       <Card>
         <CardContent className="pt-6">
-          {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : records.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد سجلات لهذا اليوم" : "No records for this date"}</p>
+          {loading ? <StatsSkeleton count={4} /> : records.length === 0 ? (
+            <EmptyState icon={Clock} title={language === "ar" ? "لا توجد سجلات لهذا اليوم" : "No records for this date"} description={language === "ar" ? "قم بتسجيل حضور الموظفين" : "Record employee attendance"} actionLabel={language === "ar" ? "تسجيل حضور" : "Record"} onAction={openAdd} />
           ) : (
             <>
               <div className="overflow-x-auto -mx-6 px-6">
