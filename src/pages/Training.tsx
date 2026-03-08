@@ -14,6 +14,7 @@ import { Plus, GraduationCap, Calendar } from "lucide-react";
 
 export default function Training() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
