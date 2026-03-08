@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Leaves() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { companyId } = useCompany();
   const [requests, setRequests] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
