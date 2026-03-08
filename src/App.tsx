@@ -12,9 +12,25 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import Employees from "./pages/Employees";
+import Departments from "./pages/Departments";
+import Attendance from "./pages/Attendance";
+import Leaves from "./pages/Leaves";
+import Payroll from "./pages/Payroll";
+import Recruitment from "./pages/Recruitment";
+import Training from "./pages/Training";
+import Performance from "./pages/Performance";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const ProtectedPage = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <AppLayout>{children}</AppLayout>
+  </ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,23 +41,22 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* Protected routes */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Dashboard />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
+              <Route path="/employees" element={<ProtectedPage><Employees /></ProtectedPage>} />
+              <Route path="/departments" element={<ProtectedPage><Departments /></ProtectedPage>} />
+              <Route path="/attendance" element={<ProtectedPage><Attendance /></ProtectedPage>} />
+              <Route path="/leaves" element={<ProtectedPage><Leaves /></ProtectedPage>} />
+              <Route path="/payroll" element={<ProtectedPage><Payroll /></ProtectedPage>} />
+              <Route path="/recruitment" element={<ProtectedPage><Recruitment /></ProtectedPage>} />
+              <Route path="/training" element={<ProtectedPage><Training /></ProtectedPage>} />
+              <Route path="/performance" element={<ProtectedPage><Performance /></ProtectedPage>} />
+              <Route path="/reports" element={<ProtectedPage><Reports /></ProtectedPage>} />
+              <Route path="/settings" element={<ProtectedPage><Settings /></ProtectedPage>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
