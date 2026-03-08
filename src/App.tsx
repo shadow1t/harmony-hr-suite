@@ -71,6 +71,8 @@ const App = () => (
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/landing" element={<Landing />} />
+                <Route path="/subscription-success" element={<SubscriptionSuccess />} />
 
                 {/* HR/Admin routes */}
                 <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
