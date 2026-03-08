@@ -195,7 +195,8 @@ export default function Employees() {
           ) : filtered.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">{t("common.noData")}</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-6 px-6">
+              <div className="min-w-[700px]">
               <Table>
                 <TableHeader>
                   <TableRow>
