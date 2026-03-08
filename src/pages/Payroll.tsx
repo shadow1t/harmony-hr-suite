@@ -263,7 +263,7 @@ export default function Payroll() {
                           <TableCell>
                             <div className="flex gap-1">
                               {next && (
-                                <Button variant="ghost" size="sm" onClick={() => updateSingleStatus(p.id, statusFlow[p.status])}>
+                                <Button variant="ghost" size="sm" onClick={() => updateSingleStatus(p.id, statusFlow[p.status] as PayrollStatus)}>
                                   <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? next.ar : next.en}
                                 </Button>
                               )}
