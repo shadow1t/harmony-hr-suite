@@ -8,16 +8,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Wallet, Play, DollarSign } from "lucide-react";
+import { Wallet, Play, DollarSign, Download } from "lucide-react";
+
+function exportCSV(data: any[], filename: string) {
+  if (!data.length) return;
+  const headers = Object.keys(data[0]);
+  const csv = [headers.join(","), ...data.map((row) => headers.map((h) => `"${row[h] ?? ""}"`).join(","))].join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function Payroll() {
   const { language } = useLanguage();
-  const { companyId } = useCompany();
+  const { companyId, company } = useCompany();
   const [payrolls, setPayrolls] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+
+  const currency = company?.currency || "SAR";
+  const insurancePct = company?.social_insurance_pct ?? 9.75;
 
   const fetchData = async () => {
     setLoading(true);
@@ -34,13 +48,14 @@ export default function Payroll() {
 
   const generatePayroll = async () => {
     if (employees.length === 0) { toast.error(language === "ar" ? "لا يوجد موظفين" : "No employees"); return; }
+    const pct = insurancePct / 100;
     const records: any[] = employees.map((e) => {
       const basic = Number(e.basic_salary) || 0;
       const housing = Number(e.housing_allowance) || 0;
       const transport = Number(e.transport_allowance) || 0;
       const other = Number(e.other_allowances) || 0;
       const gross = basic + housing + transport + other;
-      const socialInsurance = basic * 0.0975;
+      const socialInsurance = basic * pct;
       const net = gross - socialInsurance;
       return {
         employee_id: e.id, month, year, company_id: companyId,
@@ -56,10 +71,19 @@ export default function Payroll() {
   };
 
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
-
   const totalNet = payrolls.reduce((sum, p) => sum + (Number(p.net_salary) || 0), 0);
 
-  const months = language === "ar" 
+  const handleExportCSV = () => {
+    const rows = payrolls.map((p) => ({
+      Employee: p.employees ? empName(p.employees) : "",
+      "Employee #": p.employees?.employee_number || "",
+      Basic: p.basic_salary, Housing: p.housing_allowance, Transport: p.transport_allowance,
+      "Other Allowances": p.other_allowances, Insurance: p.social_insurance, Net: p.net_salary, Status: p.status,
+    }));
+    exportCSV(rows, `payroll-${year}-${month}.csv`);
+  };
+
+  const months = language === "ar"
     ? ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
     : ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -67,7 +91,7 @@ export default function Payroll() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2"><Wallet className="h-6 w-6" /> {language === "ar" ? "الرواتب" : "Payroll"}</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
             <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>{months.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}</SelectContent>
@@ -77,6 +101,9 @@ export default function Payroll() {
             <SelectContent>{[2025, 2026, 2027].map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
           </Select>
           <Button onClick={generatePayroll}><Play className="h-4 w-4 me-2" />{language === "ar" ? "إنشاء المسيّر" : "Generate"}</Button>
+          {payrolls.length > 0 && (
+            <Button variant="outline" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
+          )}
         </div>
       </div>
 
@@ -87,7 +114,10 @@ export default function Payroll() {
               <DollarSign className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">{language === "ar" ? "إجمالي صافي الرواتب" : "Total Net Payroll"}</p>
-                <p className="text-2xl font-bold">{totalNet.toLocaleString()} {language === "ar" ? "ر.س" : "SAR"}</p>
+                <p className="text-2xl font-bold">{totalNet.toLocaleString()} {currency}</p>
+              </div>
+              <div className="ms-auto text-sm text-muted-foreground">
+                {language === "ar" ? `نسبة التأمينات: ${insurancePct}%` : `Insurance: ${insurancePct}%`}
               </div>
             </div>
           </CardContent>
@@ -120,7 +150,7 @@ export default function Payroll() {
                     <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
                     <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
                     <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
-                    <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()}</TableCell>
+                    <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
                     <TableCell><Badge variant={p.status === "paid" ? "default" : "secondary"}>{p.status}</Badge></TableCell>
                   </TableRow>
                 ))}

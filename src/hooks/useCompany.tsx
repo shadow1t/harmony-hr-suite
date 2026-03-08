@@ -11,6 +11,8 @@ interface Company {
   subscription_plan: string;
   status: string;
   max_employees: number;
+  currency: string;
+  social_insurance_pct: number;
 }
 
 interface CompanyContextType {

@@ -109,34 +109,40 @@ export type Database = {
       companies: {
         Row: {
           created_at: string
+          currency: string
           domain: string | null
           id: string
           logo_url: string | null
           max_employees: number
           name_ar: string
           name_en: string
+          social_insurance_pct: number
           status: Database["public"]["Enums"]["company_status"]
           subscription_plan: Database["public"]["Enums"]["subscription_plan"]
         }
         Insert: {
           created_at?: string
+          currency?: string
           domain?: string | null
           id?: string
           logo_url?: string | null
           max_employees?: number
           name_ar: string
           name_en: string
+          social_insurance_pct?: number
           status?: Database["public"]["Enums"]["company_status"]
           subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
         }
         Update: {
           created_at?: string
+          currency?: string
           domain?: string | null
           id?: string
           logo_url?: string | null
           max_employees?: number
           name_ar?: string
           name_en?: string
+          social_insurance_pct?: number
           status?: Database["public"]["Enums"]["company_status"]
           subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
         }
@@ -193,6 +199,7 @@ export type Database = {
           branch_id: string | null
           company_id: string | null
           contract_end_date: string | null
+          contract_expiry_date: string | null
           contract_type: Database["public"]["Enums"]["contract_type"] | null
           created_at: string
           date_of_birth: string | null
@@ -205,6 +212,7 @@ export type Database = {
           hire_date: string
           housing_allowance: number | null
           id: string
+          id_expiry_date: string | null
           last_name_ar: string
           last_name_en: string | null
           marital_status: string | null
@@ -225,6 +233,7 @@ export type Database = {
           branch_id?: string | null
           company_id?: string | null
           contract_end_date?: string | null
+          contract_expiry_date?: string | null
           contract_type?: Database["public"]["Enums"]["contract_type"] | null
           created_at?: string
           date_of_birth?: string | null
@@ -237,6 +246,7 @@ export type Database = {
           hire_date?: string
           housing_allowance?: number | null
           id?: string
+          id_expiry_date?: string | null
           last_name_ar: string
           last_name_en?: string | null
           marital_status?: string | null
@@ -257,6 +267,7 @@ export type Database = {
           branch_id?: string | null
           company_id?: string | null
           contract_end_date?: string | null
+          contract_expiry_date?: string | null
           contract_type?: Database["public"]["Enums"]["contract_type"] | null
           created_at?: string
           date_of_birth?: string | null
@@ -269,6 +280,7 @@ export type Database = {
           hire_date?: string
           housing_allowance?: number | null
           id?: string
+          id_expiry_date?: string | null
           last_name_ar?: string
           last_name_en?: string | null
           marital_status?: string | null
@@ -633,6 +645,44 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
