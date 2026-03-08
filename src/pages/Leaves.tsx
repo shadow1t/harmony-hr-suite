@@ -50,8 +50,8 @@ export default function Leaves() {
     else { toast.success(language === "ar" ? "تم تقديم الطلب" : "Request submitted"); setDialogOpen(false); fetchData(); }
   };
 
-  const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("leave_requests").update({ status, approved_by: user?.id, approved_at: new Date().toISOString() }).eq("id", id);
+  const updateStatus = async (id: string, newStatus: "approved" | "rejected") => {
+    const { error } = await supabase.from("leave_requests").update({ status: newStatus, approved_by: user?.id, approved_at: new Date().toISOString() }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم التحديث" : "Updated"); fetchData(); }
   };

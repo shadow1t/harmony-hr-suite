@@ -61,14 +61,15 @@ export default function Employees() {
       toast.error(language === "ar" ? "يرجى تعبئة الحقول المطلوبة" : "Please fill required fields");
       return;
     }
-    const { error } = await supabase.from("employees").insert({
+    const payload: any = {
       ...form,
       basic_salary: parseFloat(form.basic_salary) || 0,
       housing_allowance: parseFloat(form.housing_allowance) || 0,
       transport_allowance: parseFloat(form.transport_allowance) || 0,
       department_id: form.department_id || null,
       branch_id: form.branch_id || null,
-    });
+    };
+    const { error } = await supabase.from("employees").insert(payload);
     if (error) {
       toast.error(error.message);
     } else {

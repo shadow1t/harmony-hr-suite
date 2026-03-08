@@ -32,20 +32,20 @@ export default function Payroll() {
 
   const generatePayroll = async () => {
     if (employees.length === 0) { toast.error(language === "ar" ? "لا يوجد موظفين" : "No employees"); return; }
-    const records = employees.map((e) => {
+    const records: any[] = employees.map((e) => {
       const basic = Number(e.basic_salary) || 0;
       const housing = Number(e.housing_allowance) || 0;
       const transport = Number(e.transport_allowance) || 0;
       const other = Number(e.other_allowances) || 0;
       const gross = basic + housing + transport + other;
-      const socialInsurance = basic * 0.0975; // 9.75% employee share
+      const socialInsurance = basic * 0.0975;
       const net = gross - socialInsurance;
       return {
         employee_id: e.id, month, year,
         basic_salary: basic, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         social_insurance: Math.round(socialInsurance * 100) / 100,
         net_salary: Math.round(net * 100) / 100,
-        status: "draft",
+        status: "draft" as const,
       };
     });
     const { error } = await supabase.from("payroll").upsert(records, { onConflict: "employee_id,month,year" });
