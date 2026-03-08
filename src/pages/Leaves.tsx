@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { TablePagination } from "@/components/ui/table-pagination";
+import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
 import { Plus, CalendarDays, Check, X, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,10 +27,13 @@ export default function Leaves() {
   const [requests, setRequests] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({ employee_id: "", leave_type: "annual" as "annual" | "sick" | "emergency" | "unpaid" | "maternity" | "paternity", start_date: "", end_date: "", reason: "" });
+
+  const pagination = usePagination(requests, 10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -44,29 +49,23 @@ export default function Leaves() {
   useEffect(() => { fetchData(); }, []);
 
   const calcDays = (s: string, e: string) => (!s || !e) ? 0 : Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / 86400000) + 1;
-
   const openAdd = () => { setEditingId(null); setForm({ employee_id: "", leave_type: "annual", start_date: "", end_date: "", reason: "" }); setDialogOpen(true); };
-
-  const openEdit = (r: any) => {
-    setEditingId(r.id);
-    setForm({ employee_id: r.employee_id, leave_type: r.leave_type, start_date: r.start_date, end_date: r.end_date, reason: r.reason || "" });
-    setDialogOpen(true);
-  };
+  const openEdit = (r: any) => { setEditingId(r.id); setForm({ employee_id: r.employee_id, leave_type: r.leave_type, start_date: r.start_date, end_date: r.end_date, reason: r.reason || "" }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.employee_id || !form.start_date || !form.end_date) { toast.error(language === "ar" ? "يرجى تعبئة جميع الحقول" : "Fill all fields"); return; }
+    setSaving(true);
     const days = calcDays(form.start_date, form.end_date);
-
     if (editingId) {
       const { error } = await supabase.from("leave_requests").update({ ...form, days_count: days }).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("leave_requests").insert({ ...form, days_count: days, company_id: companyId });
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم تقديم الطلب" : "Request submitted");
     }
-    setDialogOpen(false); setEditingId(null); fetchData();
+    setSaving(false); setDialogOpen(false); setEditingId(null); fetchData();
   };
 
   const handleDelete = async () => {
@@ -84,7 +83,6 @@ export default function Leaves() {
   };
 
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
-
   const leaveTypeLabel = (t: string) => {
     const map: Record<string, { ar: string; en: string }> = {
       annual: { ar: "سنوية", en: "Annual" }, sick: { ar: "مرضية", en: "Sick" }, emergency: { ar: "طوارئ", en: "Emergency" },
@@ -92,11 +90,9 @@ export default function Leaves() {
     };
     return language === "ar" ? map[t]?.ar || t : map[t]?.en || t;
   };
-
   const statusBadge = (s: string) => {
     const map: Record<string, { ar: string; en: string; v: string }> = {
-      pending: { ar: "معلق", en: "Pending", v: "secondary" },
-      approved: { ar: "مقبول", en: "Approved", v: "default" },
+      pending: { ar: "معلق", en: "Pending", v: "secondary" }, approved: { ar: "مقبول", en: "Approved", v: "default" },
       rejected: { ar: "مرفوض", en: "Rejected", v: "destructive" },
     };
     const item = map[s] || { ar: s, en: s, v: "outline" };
@@ -136,67 +132,66 @@ export default function Leaves() {
             </div>
             {form.start_date && form.end_date && <p className="text-sm text-muted-foreground">{language === "ar" ? "عدد الأيام:" : "Days:"} {calcDays(form.start_date, form.end_date)}</p>}
             <div><Label>{language === "ar" ? "السبب" : "Reason"}</Label><Textarea value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} /></div>
-            <Button onClick={handleSave} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
+      <ConfirmDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}
         title={language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
         description={language === "ar" ? "هل أنت متأكد من حذف طلب الإجازة؟" : "Are you sure you want to delete this leave request?"}
-        confirmLabel={language === "ar" ? "حذف" : "Delete"}
-        cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
-        onConfirm={handleDelete}
-      />
+        confirmLabel={language === "ar" ? "حذف" : "Delete"} cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
+        onConfirm={handleDelete} />
 
       <Card>
         <CardContent className="pt-6">
           {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : requests.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد طلبات" : "No requests"}</p>
           ) : (
-            <div className="overflow-x-auto -mx-6 px-6">
-              <div className="min-w-[800px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
-                      <TableHead>{language === "ar" ? "النوع" : "Type"}</TableHead>
-                      <TableHead>{language === "ar" ? "من" : "From"}</TableHead>
-                      <TableHead>{language === "ar" ? "إلى" : "To"}</TableHead>
-                      <TableHead>{language === "ar" ? "الأيام" : "Days"}</TableHead>
-                      <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                      <TableHead className="w-28">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {requests.map((r) => (
-                      <TableRow key={r.id}>
-                        <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
-                        <TableCell>{leaveTypeLabel(r.leave_type)}</TableCell>
-                        <TableCell>{r.start_date}</TableCell>
-                        <TableCell>{r.end_date}</TableCell>
-                        <TableCell>{r.days_count}</TableCell>
-                        <TableCell>{statusBadge(r.status)}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {r.status === "pending" && (
-                              <>
-                                <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "approved")}><Check className="h-4 w-4 text-green-600" /></Button>
-                                <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "rejected")}><X className="h-4 w-4 text-destructive" /></Button>
-                              </>
-                            )}
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => setDeleteId(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                          </div>
-                        </TableCell>
+            <>
+              <div className="overflow-x-auto -mx-6 px-6">
+                <div className="min-w-[800px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
+                        <TableHead>{language === "ar" ? "النوع" : "Type"}</TableHead>
+                        <TableHead>{language === "ar" ? "من" : "From"}</TableHead>
+                        <TableHead>{language === "ar" ? "إلى" : "To"}</TableHead>
+                        <TableHead>{language === "ar" ? "الأيام" : "Days"}</TableHead>
+                        <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                        <TableHead className="w-28">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {pagination.items.map((r: any) => (
+                        <TableRow key={r.id}>
+                          <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
+                          <TableCell>{leaveTypeLabel(r.leave_type)}</TableCell>
+                          <TableCell>{r.start_date}</TableCell>
+                          <TableCell>{r.end_date}</TableCell>
+                          <TableCell>{r.days_count}</TableCell>
+                          <TableCell>{statusBadge(r.status)}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {r.status === "pending" && (
+                                <>
+                                  <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "approved")}><Check className="h-4 w-4 text-green-600" /></Button>
+                                  <Button size="icon" variant="ghost" onClick={() => updateStatus(r.id, "rejected")}><X className="h-4 w-4 text-destructive" /></Button>
+                                </>
+                              )}
+                              <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => setDeleteId(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
+              <TablePagination {...pagination} language={language} />
+            </>
           )}
         </CardContent>
       </Card>

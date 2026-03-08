@@ -3,13 +3,18 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { TablePagination } from "@/components/ui/table-pagination";
+import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
-import { Wallet, Play, DollarSign, Download, Trash2, ArrowRight } from "lucide-react";
+import { Wallet, Play, DollarSign, Download, Trash2, ArrowRight, Pencil } from "lucide-react";
 
 function exportCSV(data: any[], filename: string) {
   if (!data.length) return;
@@ -23,6 +28,7 @@ function exportCSV(data: any[], filename: string) {
 }
 
 const statusFlow: Record<string, string> = { draft: "processing", processing: "completed", completed: "paid" };
+type PayrollStatus = "draft" | "processing" | "completed" | "paid";
 
 export default function Payroll() {
   const { language } = useLanguage();
@@ -35,8 +41,15 @@ export default function Payroll() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [bulkStatusAction, setBulkStatusAction] = useState<string | null>(null);
 
+  // Edit payroll dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingPayroll, setEditingPayroll] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ deductions: "", overtime_amount: "", other_allowances: "" });
+  const [saving, setSaving] = useState(false);
+
   const currency = company?.currency || "SAR";
   const insurancePct = company?.social_insurance_pct ?? 9.75;
+  const pagination = usePagination(payrolls, 10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -66,8 +79,7 @@ export default function Payroll() {
         employee_id: e.id, month, year, company_id: companyId,
         basic_salary: basic, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         social_insurance: Math.round(socialInsurance * 100) / 100,
-        net_salary: Math.round(net * 100) / 100,
-        status: "draft" as const,
+        net_salary: Math.round(net * 100) / 100, status: "draft" as const,
       };
     });
     const { error } = await supabase.from("payroll").upsert(records, { onConflict: "employee_id,month,year" });
@@ -75,7 +87,6 @@ export default function Payroll() {
     else { toast.success(language === "ar" ? "تم إنشاء مسيّر الرواتب" : "Payroll generated"); fetchData(); }
   };
 
-  type PayrollStatus = "draft" | "processing" | "completed" | "paid";
   const updateSingleStatus = async (id: string, newStatus: PayrollStatus) => {
     const { error } = await supabase.from("payroll").update({ status: newStatus }).eq("id", id);
     if (error) toast.error(error.message);
@@ -102,15 +113,48 @@ export default function Payroll() {
     setDeleteId(null);
   };
 
+  // Edit payroll record
+  const openEditPayroll = (p: any) => {
+    setEditingPayroll(p);
+    setEditForm({
+      deductions: (p.deductions || 0).toString(),
+      overtime_amount: (p.overtime_amount || 0).toString(),
+      other_allowances: (p.other_allowances || 0).toString(),
+    });
+    setEditOpen(true);
+  };
+
+  const handleSavePayroll = async () => {
+    if (!editingPayroll) return;
+    setSaving(true);
+    const deductions = parseFloat(editForm.deductions) || 0;
+    const overtime = parseFloat(editForm.overtime_amount) || 0;
+    const otherAllow = parseFloat(editForm.other_allowances) || 0;
+    const basic = Number(editingPayroll.basic_salary) || 0;
+    const housing = Number(editingPayroll.housing_allowance) || 0;
+    const transport = Number(editingPayroll.transport_allowance) || 0;
+    const insurance = Number(editingPayroll.social_insurance) || 0;
+    const net = basic + housing + transport + otherAllow + overtime - insurance - deductions;
+
+    const { error } = await supabase.from("payroll").update({
+      deductions, overtime_amount: overtime, other_allowances: otherAllow,
+      net_salary: Math.round(net * 100) / 100,
+    }).eq("id", editingPayroll.id);
+
+    if (error) toast.error(error.message);
+    else { toast.success(language === "ar" ? "تم التحديث" : "Updated"); fetchData(); }
+    setSaving(false); setEditOpen(false); setEditingPayroll(null);
+  };
+
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
   const totalNet = payrolls.reduce((sum, p) => sum + (Number(p.net_salary) || 0), 0);
 
   const handleExportCSV = () => {
     const rows = payrolls.map((p) => ({
-      Employee: p.employees ? empName(p.employees) : "",
-      "Employee #": p.employees?.employee_number || "",
+      Employee: p.employees ? empName(p.employees) : "", "Employee #": p.employees?.employee_number || "",
       Basic: p.basic_salary, Housing: p.housing_allowance, Transport: p.transport_allowance,
-      "Other Allowances": p.other_allowances, Insurance: p.social_insurance, Net: p.net_salary, Status: p.status,
+      "Other Allowances": p.other_allowances, Overtime: p.overtime_amount, Insurance: p.social_insurance,
+      Deductions: p.deductions, Net: p.net_salary, Status: p.status,
     }));
     exportCSV(rows, `payroll-${year}-${month}.csv`);
   };
@@ -121,10 +165,8 @@ export default function Payroll() {
 
   const statusLabel = (s: string) => {
     const map: Record<string, { ar: string; en: string; v: "default" | "secondary" | "outline" | "destructive" }> = {
-      draft: { ar: "مسودة", en: "Draft", v: "secondary" },
-      processing: { ar: "قيد المعالجة", en: "Processing", v: "outline" },
-      completed: { ar: "مكتمل", en: "Completed", v: "default" },
-      paid: { ar: "مدفوع", en: "Paid", v: "default" },
+      draft: { ar: "مسودة", en: "Draft", v: "secondary" }, processing: { ar: "قيد المعالجة", en: "Processing", v: "outline" },
+      completed: { ar: "مكتمل", en: "Completed", v: "default" }, paid: { ar: "مدفوع", en: "Paid", v: "default" },
     };
     const item = map[s] || { ar: s, en: s, v: "outline" as const };
     return <Badge variant={item.v}>{language === "ar" ? item.ar : item.en}</Badge>;
@@ -134,14 +176,11 @@ export default function Payroll() {
     const next = statusFlow[current];
     if (!next) return null;
     const labels: Record<string, { ar: string; en: string }> = {
-      processing: { ar: "بدء المعالجة", en: "Process" },
-      completed: { ar: "إكمال", en: "Complete" },
-      paid: { ar: "تأكيد الدفع", en: "Mark Paid" },
+      processing: { ar: "بدء المعالجة", en: "Process" }, completed: { ar: "إكمال", en: "Complete" }, paid: { ar: "تأكيد الدفع", en: "Mark Paid" },
     };
     return labels[next] || null;
   };
 
-  // Count by status
   const statusCounts = payrolls.reduce<Record<string, number>>((acc, p) => { acc[p.status] = (acc[p.status] || 0) + 1; return acc; }, {});
 
   return (
@@ -186,7 +225,6 @@ export default function Payroll() {
         </div>
       )}
 
-      {/* Bulk status actions */}
       {payrolls.length > 0 && (
         <Card>
           <CardContent className="p-4">
@@ -194,26 +232,43 @@ export default function Payroll() {
             <div className="flex gap-2 flex-wrap">
               {statusCounts["draft"] && (
                 <Button size="sm" variant="outline" onClick={() => setBulkStatusAction("processing")}>
-                  <ArrowRight className="h-4 w-4 me-1" />
-                  {language === "ar" ? `معالجة الكل (${statusCounts["draft"]})` : `Process All (${statusCounts["draft"]})`}
+                  <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? `معالجة الكل (${statusCounts["draft"]})` : `Process All (${statusCounts["draft"]})`}
                 </Button>
               )}
               {statusCounts["processing"] && (
                 <Button size="sm" variant="outline" onClick={() => setBulkStatusAction("completed")}>
-                  <ArrowRight className="h-4 w-4 me-1" />
-                  {language === "ar" ? `إكمال الكل (${statusCounts["processing"]})` : `Complete All (${statusCounts["processing"]})`}
+                  <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? `إكمال الكل (${statusCounts["processing"]})` : `Complete All (${statusCounts["processing"]})`}
                 </Button>
               )}
               {statusCounts["completed"] && (
                 <Button size="sm" variant="outline" onClick={() => setBulkStatusAction("paid")}>
-                  <ArrowRight className="h-4 w-4 me-1" />
-                  {language === "ar" ? `تأكيد دفع الكل (${statusCounts["completed"]})` : `Mark All Paid (${statusCounts["completed"]})`}
+                  <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? `تأكيد دفع الكل (${statusCounts["completed"]})` : `Mark All Paid (${statusCounts["completed"]})`}
                 </Button>
               )}
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Payroll Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{language === "ar" ? "تعديل بيانات الراتب" : "Edit Payroll Record"}</DialogTitle></DialogHeader>
+          {editingPayroll && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium">{editingPayroll.employees ? empName(editingPayroll.employees) : ""}</p>
+              <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+                <p>{language === "ar" ? "الأساسي:" : "Basic:"} {Number(editingPayroll.basic_salary).toLocaleString()}</p>
+                <p>{language === "ar" ? "التأمينات:" : "Insurance:"} {Number(editingPayroll.social_insurance).toLocaleString()}</p>
+              </div>
+              <div><Label>{language === "ar" ? "بدلات أخرى" : "Other Allowances"}</Label><Input type="number" value={editForm.other_allowances} onChange={(e) => setEditForm({ ...editForm, other_allowances: e.target.value })} /></div>
+              <div><Label>{language === "ar" ? "إضافي (ساعات إضافية)" : "Overtime Amount"}</Label><Input type="number" value={editForm.overtime_amount} onChange={(e) => setEditForm({ ...editForm, overtime_amount: e.target.value })} /></div>
+              <div><Label>{language === "ar" ? "خصومات" : "Deductions"}</Label><Input type="number" value={editForm.deductions} onChange={(e) => setEditForm({ ...editForm, deductions: e.target.value })} /></div>
+              <Button onClick={handleSavePayroll} disabled={saving} className="w-full">{saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog open={!!bulkStatusAction} onOpenChange={(o) => !o && setBulkStatusAction(null)}
         title={language === "ar" ? "تأكيد التحديث الجماعي" : "Confirm Bulk Update"}
@@ -235,48 +290,56 @@ export default function Payroll() {
               <Button variant="outline" onClick={generatePayroll}>{language === "ar" ? "إنشاء الآن" : "Generate Now"}</Button>
             </div>
           ) : (
-            <div className="overflow-x-auto -mx-6 px-6">
-              <div className="min-w-[800px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
-                      <TableHead>{language === "ar" ? "الأساسي" : "Basic"}</TableHead>
-                      <TableHead>{language === "ar" ? "البدلات" : "Allowances"}</TableHead>
-                      <TableHead>{language === "ar" ? "التأمينات" : "Insurance"}</TableHead>
-                      <TableHead>{language === "ar" ? "الصافي" : "Net"}</TableHead>
-                      <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                      <TableHead className="w-28">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payrolls.map((p) => {
-                      const next = nextStatusLabel(p.status);
-                      return (
-                        <TableRow key={p.id}>
-                          <TableCell className="font-medium">{p.employees ? empName(p.employees) : "-"}</TableCell>
-                          <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
-                          <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
-                          <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
-                          <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
-                          <TableCell>{statusLabel(p.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              {next && (
-                                <Button variant="ghost" size="sm" onClick={() => updateSingleStatus(p.id, statusFlow[p.status] as PayrollStatus)}>
-                                  <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? next.ar : next.en}
-                                </Button>
-                              )}
-                              <Button variant="ghost" size="icon" onClick={() => setDeleteId(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+            <>
+              <div className="overflow-x-auto -mx-6 px-6">
+                <div className="min-w-[900px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
+                        <TableHead>{language === "ar" ? "الأساسي" : "Basic"}</TableHead>
+                        <TableHead>{language === "ar" ? "البدلات" : "Allowances"}</TableHead>
+                        <TableHead>{language === "ar" ? "إضافي" : "Overtime"}</TableHead>
+                        <TableHead>{language === "ar" ? "التأمينات" : "Insurance"}</TableHead>
+                        <TableHead>{language === "ar" ? "خصومات" : "Deductions"}</TableHead>
+                        <TableHead>{language === "ar" ? "الصافي" : "Net"}</TableHead>
+                        <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                        <TableHead className="w-32">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pagination.items.map((p: any) => {
+                        const next = nextStatusLabel(p.status);
+                        return (
+                          <TableRow key={p.id}>
+                            <TableCell className="font-medium">{p.employees ? empName(p.employees) : "-"}</TableCell>
+                            <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
+                            <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
+                            <TableCell>{Number(p.overtime_amount || 0).toLocaleString()}</TableCell>
+                            <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
+                            <TableCell className="text-destructive">{Number(p.deductions || 0) > 0 ? `-${Number(p.deductions).toLocaleString()}` : "0"}</TableCell>
+                            <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
+                            <TableCell>{statusLabel(p.status)}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" onClick={() => openEditPayroll(p)}><Pencil className="h-4 w-4" /></Button>
+                                {next && (
+                                  <Button variant="ghost" size="sm" onClick={() => updateSingleStatus(p.id, statusFlow[p.status] as PayrollStatus)}>
+                                    <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? next.ar : next.en}
+                                  </Button>
+                                )}
+                                <Button variant="ghost" size="icon" onClick={() => setDeleteId(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
+              <TablePagination {...pagination} language={language} />
+            </>
           )}
         </CardContent>
       </Card>

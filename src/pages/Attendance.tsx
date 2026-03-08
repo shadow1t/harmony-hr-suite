@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { TablePagination } from "@/components/ui/table-pagination";
+import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
 import { Plus, Clock, Pencil, Trash2 } from "lucide-react";
 
@@ -20,11 +22,14 @@ export default function Attendance() {
   const [records, setRecords] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({ employee_id: "", date: new Date().toISOString().split("T")[0], check_in: "", check_out: "", status: "present" });
   const [dateFilter, setDateFilter] = useState(new Date().toISOString().split("T")[0]);
+
+  const pagination = usePagination(records, 10);
 
   const fetchData = async () => {
     setLoading(true);
@@ -37,15 +42,13 @@ export default function Attendance() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [dateFilter]);
+  useEffect(() => { fetchData(); pagination.resetPage(); }, [dateFilter]);
 
   const openAdd = () => { setEditingId(null); setForm({ employee_id: "", date: dateFilter, check_in: "", check_out: "", status: "present" }); setDialogOpen(true); };
-
   const openEdit = (r: any) => {
     setEditingId(r.id);
     setForm({
-      employee_id: r.employee_id,
-      date: r.date,
+      employee_id: r.employee_id, date: r.date,
       check_in: r.check_in ? new Date(r.check_in).toTimeString().slice(0, 5) : "",
       check_out: r.check_out ? new Date(r.check_out).toTimeString().slice(0, 5) : "",
       status: r.status || "present",
@@ -55,6 +58,7 @@ export default function Attendance() {
 
   const handleSave = async () => {
     if (!form.employee_id) { toast.error(language === "ar" ? "اختر الموظف" : "Select employee"); return; }
+    setSaving(true);
     const payload: any = { employee_id: form.employee_id, date: form.date, status: form.status, company_id: companyId };
     if (form.check_in) payload.check_in = `${form.date}T${form.check_in}:00`;
     else payload.check_in = null;
@@ -63,14 +67,14 @@ export default function Attendance() {
 
     if (editingId) {
       const { error } = await supabase.from("attendance").update(payload).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("attendance").insert(payload);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم تسجيل الحضور" : "Attendance recorded");
     }
-    setDialogOpen(false); setEditingId(null); fetchData();
+    setSaving(false); setDialogOpen(false); setEditingId(null); fetchData();
   };
 
   const handleDelete = async () => {
@@ -82,13 +86,7 @@ export default function Attendance() {
   };
 
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
-
-  const statusColor = (s: string) => {
-    if (s === "present") return "default";
-    if (s === "late") return "secondary";
-    if (s === "absent") return "destructive";
-    return "outline";
-  };
+  const statusColor = (s: string) => { if (s === "present") return "default"; if (s === "late") return "secondary"; if (s === "absent") return "destructive"; return "outline"; };
 
   return (
     <div className="space-y-6">
@@ -125,59 +123,58 @@ export default function Attendance() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleSave} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
+      <ConfirmDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}
         title={language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
         description={language === "ar" ? "هل أنت متأكد من حذف هذا السجل؟" : "Are you sure you want to delete this record?"}
-        confirmLabel={language === "ar" ? "حذف" : "Delete"}
-        cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
-        onConfirm={handleDelete}
-      />
+        confirmLabel={language === "ar" ? "حذف" : "Delete"} cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
+        onConfirm={handleDelete} />
 
       <Card>
         <CardContent className="pt-6">
           {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : records.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد سجلات لهذا اليوم" : "No records for this date"}</p>
           ) : (
-            <div className="overflow-x-auto -mx-6 px-6">
-              <div className="min-w-[650px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{language === "ar" ? "الرقم الوظيفي" : "ID"}</TableHead>
-                      <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
-                      <TableHead>{language === "ar" ? "الحضور" : "Check In"}</TableHead>
-                      <TableHead>{language === "ar" ? "الانصراف" : "Check Out"}</TableHead>
-                      <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                      <TableHead className="w-20">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {records.map((r) => (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-mono">{r.employees?.employee_number}</TableCell>
-                        <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
-                        <TableCell>{r.check_in ? new Date(r.check_in).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
-                        <TableCell>{r.check_out ? new Date(r.check_out).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
-                        <TableCell><Badge variant={statusColor(r.status) as any}>{r.status}</Badge></TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => setDeleteId(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                          </div>
-                        </TableCell>
+            <>
+              <div className="overflow-x-auto -mx-6 px-6">
+                <div className="min-w-[650px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{language === "ar" ? "الرقم الوظيفي" : "ID"}</TableHead>
+                        <TableHead>{language === "ar" ? "الموظف" : "Employee"}</TableHead>
+                        <TableHead>{language === "ar" ? "الحضور" : "Check In"}</TableHead>
+                        <TableHead>{language === "ar" ? "الانصراف" : "Check Out"}</TableHead>
+                        <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                        <TableHead className="w-20">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {pagination.items.map((r: any) => (
+                        <TableRow key={r.id}>
+                          <TableCell className="font-mono">{r.employees?.employee_number}</TableCell>
+                          <TableCell>{r.employees ? empName(r.employees) : "-"}</TableCell>
+                          <TableCell>{r.check_in ? new Date(r.check_in).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
+                          <TableCell>{r.check_out ? new Date(r.check_out).toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
+                          <TableCell><Badge variant={statusColor(r.status) as any}>{r.status}</Badge></TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => setDeleteId(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
+              <TablePagination {...pagination} language={language} />
+            </>
           )}
         </CardContent>
       </Card>
