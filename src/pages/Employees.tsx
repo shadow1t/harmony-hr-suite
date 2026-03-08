@@ -122,10 +122,8 @@ export default function Employees() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
+          <Button type="button" onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4 me-2" />{t("employees.addNew")}</Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 me-2" />{t("employees.addNew")}</Button>
-            </DialogTrigger>
             <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{t("employees.addNew")}</DialogTitle></DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
