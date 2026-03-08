@@ -39,7 +39,8 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(({ title, value
       </CardContent>
     </Card>
   );
-}
+});
+StatCard.displayName = "StatCard";
 
 interface ExpiryAlert {
   name: string;
