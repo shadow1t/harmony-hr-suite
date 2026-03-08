@@ -149,8 +149,8 @@ export default function Attendance() {
 
       <Card>
         <CardContent className="pt-6">
-          {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : records.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد سجلات لهذا اليوم" : "No records for this date"}</p>
+          {loading ? <StatsSkeleton count={4} /> : records.length === 0 ? (
+            <EmptyState icon={Clock} title={language === "ar" ? "لا توجد سجلات لهذا اليوم" : "No records for this date"} description={language === "ar" ? "قم بتسجيل حضور الموظفين" : "Record employee attendance"} actionLabel={language === "ar" ? "تسجيل حضور" : "Record"} onAction={openAdd} />
           ) : (
             <>
               <div className="overflow-x-auto -mx-6 px-6">

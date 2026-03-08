@@ -158,7 +158,7 @@ export default function Leaves() {
       <Card>
         <CardContent className="pt-6">
           {loading ? <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : requests.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد طلبات" : "No requests"}</p>
+            <EmptyState icon={CalendarDays} title={language === "ar" ? "لا توجد طلبات" : "No requests"} description={language === "ar" ? "قم بإنشاء طلب إجازة جديد" : "Create a new leave request"} actionLabel={language === "ar" ? "طلب إجازة" : "Request Leave"} onAction={openAdd} />
           ) : (
             <>
               <div className="overflow-x-auto -mx-6 px-6">
