@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export default function Register() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +35,7 @@ export default function Register() {
       toast.error(error.message);
     } else {
       toast.success(t('auth.registerSuccess'));
+      navigate('/');
     }
     setLoading(false);
   };
