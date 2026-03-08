@@ -15,7 +15,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
-import { Plus, CalendarDays, Check, X, Pencil, Trash2 } from "lucide-react";
+import { Plus, CalendarDays, Check, X, Pencil, Trash2, Clock, CheckCircle, XCircle } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 import { useAuth } from "@/hooks/useAuth";
 
 const leaveTypes = ["annual", "sick", "emergency", "unpaid", "maternity", "paternity"];
