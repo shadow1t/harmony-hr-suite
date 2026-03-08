@@ -114,6 +114,7 @@ export default function Training() {
 
   return (
     <div className="space-y-6">
+      <PageBreadcrumb />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={BookOpen} label={language === "ar" ? "الدورات" : "Courses"} value={courses.length} />
         <StatCard icon={Calendar} label={language === "ar" ? "مجدولة" : "Scheduled"} value={scheduledCourses} color="text-yellow-600" />
