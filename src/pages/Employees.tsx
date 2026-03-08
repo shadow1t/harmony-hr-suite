@@ -126,7 +126,7 @@ export default function Employees() {
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 me-2" />{t("employees.addNew")}</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{t("employees.addNew")}</DialogTitle></DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><Label>{language === "ar" ? "الرقم الوظيفي *" : "Employee Number *"}</Label><Input value={form.employee_number} onChange={(e) => setForm({ ...form, employee_number: e.target.value })} /></div>
