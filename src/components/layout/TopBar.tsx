@@ -1,4 +1,4 @@
-import { Globe, Bell, LogOut } from "lucide-react";
+import { Globe, Bell, LogOut, Moon, Sun, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
