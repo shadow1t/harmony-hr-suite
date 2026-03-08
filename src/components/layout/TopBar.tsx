@@ -96,6 +96,14 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
+        <Button variant="ghost" size="icon" onClick={() => { const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true }); document.dispatchEvent(event); }} title="⌘K" className="h-8 w-8 sm:h-9 sm:w-9 hidden sm:flex">
+          <Search className="h-4 w-4" />
+        </Button>
+
+        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="h-8 w-8 sm:h-9 sm:w-9">
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
+
         <Button variant="ghost" size="icon" onClick={toggleLanguage} title={t('language.switch')} className="h-8 w-8 sm:h-9 sm:w-9">
           <Globe className="h-4 w-4" />
         </Button>
