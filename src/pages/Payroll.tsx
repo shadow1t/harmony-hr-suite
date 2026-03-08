@@ -88,7 +88,7 @@ export default function Payroll() {
     if (!currentStatus) return;
     const ids = payrolls.filter(p => p.status === currentStatus).map(p => p.id);
     if (ids.length === 0) { toast.error(language === "ar" ? "لا توجد سجلات للتحديث" : "No records to update"); setBulkStatusAction(null); return; }
-    const { error } = await supabase.from("payroll").update({ status: bulkStatusAction }).in("id", ids);
+    const { error } = await supabase.from("payroll").update({ status: bulkStatusAction as PayrollStatus }).in("id", ids);
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? `تم تحديث ${ids.length} سجل` : `Updated ${ids.length} records`); fetchData(); }
     setBulkStatusAction(null);
