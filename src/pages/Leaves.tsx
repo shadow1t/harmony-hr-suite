@@ -125,7 +125,7 @@ export default function Leaves() {
             </div>
             <div>
               <Label>{language === "ar" ? "نوع الإجازة" : "Leave Type"}</Label>
-              <Select value={form.leave_type} onValueChange={(v) => setForm({ ...form, leave_type: v })}>
+              <Select value={form.leave_type} onValueChange={(v: typeof form.leave_type) => setForm({ ...form, leave_type: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{leaveTypes.map((t) => <SelectItem key={t} value={t}>{leaveTypeLabel(t)}</SelectItem>)}</SelectContent>
               </Select>
