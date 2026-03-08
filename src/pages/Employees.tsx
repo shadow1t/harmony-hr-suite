@@ -115,15 +115,17 @@ export default function Employees() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">{t("employees.title")}</h1>
           <p className="text-muted-foreground flex items-center gap-1 text-sm"><Users className="h-4 w-4" /> {filtered.length} {language === "ar" ? "موظف" : "employees"}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
-          <Button type="button" onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4 me-2" />{t("employees.addNew")}</Button>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm"><Plus className="h-4 w-4 me-2" />{t("employees.addNew")}</Button>
+            </DialogTrigger>
             <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{t("employees.addNew")}</DialogTitle></DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
