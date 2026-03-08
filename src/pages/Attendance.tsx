@@ -15,6 +15,7 @@ import { Plus, Clock } from "lucide-react";
 
 export default function Attendance() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [records, setRecords] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
