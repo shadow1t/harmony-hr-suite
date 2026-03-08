@@ -110,13 +110,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
-        <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
+        <h1 className="text-xl sm:text-2xl font-bold">{t('dashboard.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('dashboard.welcome')}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((stat) => <StatCard key={stat.title} {...stat} />)}
       </div>
 
