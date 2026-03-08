@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Wallet, Play, DollarSign } from "lucide-react";
 
 export default function Payroll() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [payrolls, setPayrolls] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export default function Payroll() {
       const socialInsurance = basic * 0.0975;
       const net = gross - socialInsurance;
       return {
-        employee_id: e.id, month, year,
+        employee_id: e.id, month, year, company_id: companyId,
         basic_salary: basic, housing_allowance: housing, transport_allowance: transport, other_allowances: other,
         social_insurance: Math.round(socialInsurance * 100) / 100,
         net_salary: Math.round(net * 100) / 100,

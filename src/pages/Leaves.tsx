@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Leaves() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { companyId } = useCompany();
   const [requests, setRequests] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ export default function Leaves() {
   const handleAdd = async () => {
     if (!form.employee_id || !form.start_date || !form.end_date) { toast.error(language === "ar" ? "يرجى تعبئة جميع الحقول" : "Fill all fields"); return; }
     const days = calcDays(form.start_date, form.end_date);
-    const payload: any = { ...form, days_count: days };
+    const payload: any = { ...form, days_count: days, company_id: companyId };
     const { error } = await supabase.from("leave_requests").insert(payload);
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم تقديم الطلب" : "Request submitted"); setDialogOpen(false); fetchData(); }

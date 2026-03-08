@@ -10,10 +10,12 @@ import {
   Building2,
   FileText,
   Settings,
+  Shield,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import {
   Sidebar,
   SidebarContent,
@@ -89,6 +91,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { t } = useLanguage();
+  const { company, isSuperAdmin } = useCompany();
 
   return (
     <Sidebar collapsible="icon">
@@ -99,7 +102,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-sidebar-foreground">{t('app.name')}</span>
+              <span className="text-sm font-semibold text-sidebar-foreground">{company?.name_en || t('app.name')}</span>
             </div>
           )}
         </div>
@@ -133,8 +136,20 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {isSuperAdmin && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <NavLink to="/admin" className="hover:bg-sidebar-accent/50 text-destructive">
+                  <Shield className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span>Platform Admin</span>}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <div className="px-2 py-2 text-xs text-sidebar-foreground/50">
-          {!collapsed && "© 2026 HR System"}
+          {!collapsed && "© 2026 HR SaaS Platform"}
         </div>
       </SidebarFooter>
     </Sidebar>

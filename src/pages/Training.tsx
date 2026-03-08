@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Plus, GraduationCap, Calendar } from "lucide-react";
 
 export default function Training() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -31,6 +33,7 @@ export default function Training() {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
     const { error } = await supabase.from("training_courses").insert({
       ...form,
+      company_id: companyId,
       max_participants: form.max_participants ? parseInt(form.max_participants) : null,
       start_date: form.start_date || null,
       end_date: form.end_date || null,

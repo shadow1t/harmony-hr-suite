@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Plus, Building2, Trash2 } from "lucide-react";
 
 export default function Departments() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [departments, setDepartments] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,14 +37,14 @@ export default function Departments() {
 
   const addDepartment = async () => {
     if (!deptForm.name_ar || !deptForm.name_en) { toast.error(language === "ar" ? "يرجى تعبئة الاسم" : "Name required"); return; }
-    const { error } = await supabase.from("departments").insert(deptForm);
+    const { error } = await supabase.from("departments").insert({ ...deptForm, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إضافة القسم" : "Department added"); setDeptOpen(false); setDeptForm({ name_ar: "", name_en: "", description_ar: "", description_en: "" }); fetchData(); }
   };
 
   const addBranch = async () => {
     if (!branchForm.name_ar || !branchForm.name_en) { toast.error(language === "ar" ? "يرجى تعبئة الاسم" : "Name required"); return; }
-    const { error } = await supabase.from("branches").insert(branchForm);
+    const { error } = await supabase.from("branches").insert({ ...branchForm, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إضافة الفرع" : "Branch added"); setBranchOpen(false); setBranchForm({ name_ar: "", name_en: "", city: "", address: "", phone: "" }); fetchData(); }
   };

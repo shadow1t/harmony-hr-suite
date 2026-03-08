@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Plus, TrendingUp, Target } from "lucide-react";
 
 export default function Performance() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [cycles, setCycles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -29,7 +31,7 @@ export default function Performance() {
 
   const handleAdd = async () => {
     if (!form.name_ar || !form.start_date || !form.end_date) { toast.error(language === "ar" ? "يرجى تعبئة الحقول" : "Fill all fields"); return; }
-    const { error } = await supabase.from("evaluation_cycles").insert(form);
+    const { error } = await supabase.from("evaluation_cycles").insert({ ...form, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إنشاء الدورة" : "Cycle created"); setDialogOpen(false); fetchData(); }
   };

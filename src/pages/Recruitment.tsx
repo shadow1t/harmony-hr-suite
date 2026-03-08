@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { Plus, UserPlus, Briefcase } from "lucide-react";
 
 export default function Recruitment() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [jobs, setJobs] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export default function Recruitment() {
 
   const handleAdd = async () => {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
-    const { error } = await supabase.from("job_postings").insert({ ...form, department_id: form.department_id || null });
+    const { error } = await supabase.from("job_postings").insert({ ...form, department_id: form.department_id || null, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إضافة الوظيفة" : "Job posted"); setDialogOpen(false); fetchData(); }
   };
