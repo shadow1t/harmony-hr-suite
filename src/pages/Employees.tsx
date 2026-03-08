@@ -223,6 +223,7 @@ export default function Employees() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </div>
           )}
         </CardContent>
