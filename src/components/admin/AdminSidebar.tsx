@@ -28,7 +28,7 @@ export function AdminSidebar() {
   const { language } = useLanguage();
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" side={language === "ar" ? "right" : "left"}>
       <SidebarHeader className="border-b border-sidebar-border pb-4">
         <div className="flex items-center gap-3 px-2">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-destructive text-destructive-foreground font-bold text-xs">
