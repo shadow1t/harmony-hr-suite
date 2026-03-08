@@ -90,11 +90,11 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { company, isSuperAdmin } = useCompany();
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" side={language === "ar" ? "right" : "left"}>
       <SidebarHeader className="border-b border-sidebar-border pb-4">
         <div className="flex items-center gap-3 px-2">
           {company?.logo_url ? (
