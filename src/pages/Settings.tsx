@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, Globe, User, Shield } from "lucide-react";
+import { Settings as SettingsIcon, Globe, User, Shield, Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
   const { language, setLanguage } = useLanguage();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -46,13 +48,21 @@ export default function Settings() {
           </CardContent>
         </Card>
 
+        <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/settings/company")}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> {language === "ar" ? "إعدادات الشركة" : "Company Settings"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{language === "ar" ? "تعديل اسم الشركة، الشعار، والإعدادات الأخرى" : "Edit company name, logo, and other settings"}</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" /> {language === "ar" ? "الأمان" : "Security"}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">{language === "ar" ? "تغيير كلمة المرور عبر إعادة تعيين كلمة المرور بالبريد الإلكتروني" : "Change password via email reset"}</p>
-            <p className="text-sm text-muted-foreground">{language === "ar" ? "معرف المستخدم:" : "User ID:"} <span className="font-mono text-xs">{user?.id}</span></p>
           </CardContent>
         </Card>
       </div>

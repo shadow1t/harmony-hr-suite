@@ -97,9 +97,13 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border pb-4">
         <div className="flex items-center gap-3 px-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-sm">
-            HR
-          </div>
+          {company?.logo_url ? (
+            <img src={company.logo_url} alt="Logo" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-sm">
+              HR
+            </div>
+          )}
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-sidebar-foreground">{company?.name_en || t('app.name')}</span>
