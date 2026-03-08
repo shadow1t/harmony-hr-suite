@@ -37,7 +37,7 @@ export default function Departments() {
 
   const addDepartment = async () => {
     if (!deptForm.name_ar || !deptForm.name_en) { toast.error(language === "ar" ? "يرجى تعبئة الاسم" : "Name required"); return; }
-    const { error } = await supabase.from("departments").insert(deptForm);
+    const { error } = await supabase.from("departments").insert({ ...deptForm, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم إضافة القسم" : "Department added"); setDeptOpen(false); setDeptForm({ name_ar: "", name_en: "", description_ar: "", description_en: "" }); fetchData(); }
   };
