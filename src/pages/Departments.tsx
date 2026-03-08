@@ -83,18 +83,20 @@ export default function Departments() {
           </CardHeader>
           <CardContent>
             {loading ? <p className="text-muted-foreground text-center py-4">{language === "ar" ? "جاري التحميل..." : "Loading..."}</p> : (
-              <Table>
-                <TableHeader><TableRow><TableHead>{language === "ar" ? "الاسم" : "Name"}</TableHead><TableHead>{language === "ar" ? "الوصف" : "Description"}</TableHead><TableHead></TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {departments.map((d) => (
-                    <TableRow key={d.id}>
-                      <TableCell className="font-medium">{language === "ar" ? d.name_ar : d.name_en}</TableCell>
-                      <TableCell className="text-muted-foreground">{language === "ar" ? d.description_ar : d.description_en}</TableCell>
-                      <TableCell><Button variant="ghost" size="icon" onClick={() => deleteDept(d.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader><TableRow><TableHead>{language === "ar" ? "الاسم" : "Name"}</TableHead><TableHead>{language === "ar" ? "الوصف" : "Description"}</TableHead><TableHead className="w-12"></TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {departments.map((d) => (
+                      <TableRow key={d.id}>
+                        <TableCell className="font-medium">{language === "ar" ? d.name_ar : d.name_en}</TableCell>
+                        <TableCell className="text-muted-foreground">{language === "ar" ? d.description_ar : d.description_en}</TableCell>
+                        <TableCell><Button variant="ghost" size="icon" onClick={() => deleteDept(d.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
