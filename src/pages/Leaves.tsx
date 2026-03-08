@@ -28,7 +28,7 @@ export default function Leaves() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState({ employee_id: "", leave_type: "annual", start_date: "", end_date: "", reason: "" });
+  const [form, setForm] = useState({ employee_id: "", leave_type: "annual" as "annual" | "sick" | "emergency" | "unpaid" | "maternity" | "paternity", start_date: "", end_date: "", reason: "" });
 
   const fetchData = async () => {
     setLoading(true);
