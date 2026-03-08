@@ -36,6 +36,7 @@ export function TopBar() {
   const { user, signOut } = useAuth();
   const { companyId } = useCompany();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
