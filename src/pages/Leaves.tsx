@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Plus, CalendarDays, Check, X, Pencil, Trash2, Clock, CheckCircle, XCircle } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { useAuth } from "@/hooks/useAuth";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const leaveTypes = ["annual", "sick", "emergency", "unpaid", "maternity", "paternity"];
 
