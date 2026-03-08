@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Plus, GraduationCap, Calendar, Pencil, Trash2, UserPlus, Users } from "lucide-react";
+import { Plus, GraduationCap, Calendar, Pencil, Trash2, UserPlus, Users, BookOpen } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Training() {
   const { language } = useLanguage();
