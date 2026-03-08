@@ -1,7 +1,11 @@
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useCompany } from "@/hooks/useCompany";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, CalendarDays, Wallet, UserPlus, TrendingUp } from "lucide-react";
+import { Users, Clock, CalendarDays, Wallet, UserPlus, TrendingUp, AlertTriangle, AlertOctagon } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Badge } from "@/components/ui/badge";
 
 const CHART_COLORS = [
   "hsl(215, 80%, 48%)",
@@ -11,28 +15,11 @@ const CHART_COLORS = [
   "hsl(0, 72%, 51%)",
 ];
 
-const attendanceData = [
-  { name: 'Sun', value: 92 },
-  { name: 'Mon', value: 96 },
-  { name: 'Tue', value: 88 },
-  { name: 'Wed', value: 94 },
-  { name: 'Thu', value: 91 },
-];
-
-const departmentData = [
-  { name: 'IT', value: 45 },
-  { name: 'HR', value: 12 },
-  { name: 'Finance', value: 18 },
-  { name: 'Marketing', value: 25 },
-  { name: 'Operations', value: 35 },
-];
-
 interface StatCardProps {
   title: string;
   value: string | number;
   icon: React.ComponentType<{ className?: string }>;
   trend?: string;
-  color?: string;
 }
 
 function StatCard({ title, value, icon: Icon, trend }: StatCardProps) {
@@ -54,16 +41,72 @@ function StatCard({ title, value, icon: Icon, trend }: StatCardProps) {
   );
 }
 
-export default function Dashboard() {
-  const { t } = useLanguage();
+interface ExpiryAlert {
+  name: string;
+  type: "id" | "contract";
+  date: string;
+  expired: boolean;
+}
 
-  const stats: StatCardProps[] = [
-    { title: t('dashboard.totalEmployees'), value: 248, icon: Users, trend: '+12 this month' },
-    { title: t('dashboard.presentToday'), value: 215, icon: Clock, trend: '86.7%' },
-    { title: t('dashboard.onLeave'), value: 18, icon: CalendarDays },
-    { title: t('dashboard.pendingRequests'), value: 7, icon: TrendingUp },
-    { title: t('dashboard.monthlyPayroll'), value: 'SAR 1.2M', icon: Wallet },
-    { title: t('dashboard.openPositions'), value: 5, icon: UserPlus },
+export default function Dashboard() {
+  const { t, language } = useLanguage();
+  const { companyId } = useCompany();
+  const [stats, setStats] = useState({ employees: 0, present: 0, onLeave: 0, pending: 0 });
+  const [alerts, setAlerts] = useState<ExpiryAlert[]>([]);
+  const [deptData, setDeptData] = useState<{ name: string; value: number }[]>([]);
+
+  useEffect(() => {
+    if (!companyId) return;
+
+    const fetchDashboard = async () => {
+      const today = new Date().toISOString().split("T")[0];
+      const future30 = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
+
+      const [empRes, attRes, leaveRes, pendingRes, deptRes] = await Promise.all([
+        supabase.from("employees").select("id, first_name_ar, last_name_ar, first_name_en, last_name_en, id_expiry_date, contract_expiry_date, department_id, status").eq("status", "active"),
+        supabase.from("attendance").select("id").eq("date", today),
+        supabase.from("leave_requests").select("id").eq("status", "approved").lte("start_date", today).gte("end_date", today),
+        supabase.from("leave_requests").select("id").eq("status", "pending"),
+        supabase.from("departments").select("id, name_ar, name_en"),
+      ]);
+
+      const emps = empRes.data || [];
+      setStats({
+        employees: emps.length,
+        present: attRes.data?.length || 0,
+        onLeave: leaveRes.data?.length || 0,
+        pending: pendingRes.data?.length || 0,
+      });
+
+      // Expiry alerts
+      const expiryAlerts: ExpiryAlert[] = [];
+      emps.forEach((e) => {
+        const name = language === "ar" ? `${e.first_name_ar} ${e.last_name_ar}` : `${e.first_name_en || e.first_name_ar} ${e.last_name_en || e.last_name_ar}`;
+        if (e.id_expiry_date && e.id_expiry_date <= future30) {
+          expiryAlerts.push({ name, type: "id", date: e.id_expiry_date, expired: e.id_expiry_date < today });
+        }
+        if (e.contract_expiry_date && e.contract_expiry_date <= future30) {
+          expiryAlerts.push({ name, type: "contract", date: e.contract_expiry_date, expired: e.contract_expiry_date < today });
+        }
+      });
+      setAlerts(expiryAlerts.sort((a, b) => a.date.localeCompare(b.date)));
+
+      // Department distribution
+      const depts = deptRes.data || [];
+      const deptMap: Record<string, { name: string; count: number }> = {};
+      depts.forEach((d) => { deptMap[d.id] = { name: language === "ar" ? d.name_ar : d.name_en, count: 0 }; });
+      emps.forEach((e) => { if (e.department_id && deptMap[e.department_id]) deptMap[e.department_id].count++; });
+      setDeptData(Object.values(deptMap).filter((d) => d.count > 0).map((d) => ({ name: d.name, value: d.count })));
+    };
+
+    fetchDashboard();
+  }, [companyId, language]);
+
+  const statCards: StatCardProps[] = [
+    { title: t('dashboard.totalEmployees'), value: stats.employees, icon: Users },
+    { title: t('dashboard.presentToday'), value: stats.present, icon: Clock },
+    { title: t('dashboard.onLeave'), value: stats.onLeave, icon: CalendarDays },
+    { title: t('dashboard.pendingRequests'), value: stats.pending, icon: TrendingUp },
   ];
 
   return (
@@ -73,45 +116,63 @@ export default function Dashboard() {
         <p className="text-muted-foreground">{t('dashboard.welcome')}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat) => <StatCard key={stat.title} {...stat} />)}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      {/* Expiry Alerts */}
+      {alerts.length > 0 && (
+        <Card className="border-orange-300 dark:border-orange-700">
           <CardHeader>
-            <CardTitle className="text-lg">{t('dashboard.attendanceRate')}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-orange-600">
+              <AlertTriangle className="h-5 w-5" />
+              {language === "ar" ? "تنبيهات هامة" : "Critical Alerts"}
+              <Badge variant="destructive" className="ms-2">{alerts.length}</Badge>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={attendanceData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[80, 100]} />
-                <Tooltip />
-                <Bar dataKey="value" fill="hsl(215, 80%, 48%)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-2">
+              {alerts.map((a, i) => (
+                <div key={i} className={`flex items-center gap-3 p-3 rounded-lg ${a.expired ? "bg-destructive/10 border border-destructive/20" : "bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800"}`}>
+                  {a.expired ? <AlertOctagon className="h-4 w-4 text-destructive shrink-0" /> : <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />}
+                  <div className="flex-1 text-sm">
+                    <span className="font-medium">{a.name}</span>
+                    {" — "}
+                    <span className="text-muted-foreground">
+                      {a.type === "id" ? (language === "ar" ? "الهوية" : "ID") : (language === "ar" ? "العقد" : "Contract")}
+                    </span>
+                    {" — "}
+                    <span className={a.expired ? "text-destructive font-semibold" : "text-orange-600 font-semibold"}>
+                      {a.expired ? (language === "ar" ? "منتهي" : "Expired") : (language === "ar" ? "ينتهي" : "Expires")} {a.date}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
+      )}
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t('dashboard.departmentDistribution')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie data={departmentData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                  {departmentData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {deptData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie data={deptData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                    {deptData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center py-8 text-muted-foreground">{language === "ar" ? "لا توجد بيانات" : "No data"}</p>
+            )}
           </CardContent>
         </Card>
       </div>

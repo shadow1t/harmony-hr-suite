@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Building2, Image, Save } from "lucide-react";
+import { Building2, Image, Save, Settings2 } from "lucide-react";
 
 export default function CompanySettings() {
   const { language } = useLanguage();
   const { company, companyId, refetch } = useCompany();
-  const [form, setForm] = useState({ name_ar: "", name_en: "", logo_url: "" });
+  const [form, setForm] = useState({ name_ar: "", name_en: "", logo_url: "", currency: "SAR", social_insurance_pct: "9.75" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -21,6 +21,8 @@ export default function CompanySettings() {
         name_ar: company.name_ar || "",
         name_en: company.name_en || "",
         logo_url: company.logo_url || "",
+        currency: company.currency || "SAR",
+        social_insurance_pct: String(company.social_insurance_pct ?? 9.75),
       });
     }
   }, [company]);
@@ -34,12 +36,13 @@ export default function CompanySettings() {
         name_ar: form.name_ar,
         name_en: form.name_en,
         logo_url: form.logo_url || null,
+        currency: form.currency,
+        social_insurance_pct: parseFloat(form.social_insurance_pct) || 9.75,
       })
       .eq("id", companyId);
 
-    if (error) {
-      toast.error(error.message);
-    } else {
+    if (error) toast.error(error.message);
+    else {
       toast.success(language === "ar" ? "تم حفظ الإعدادات بنجاح" : "Settings saved successfully");
       await refetch();
     }
@@ -80,23 +83,32 @@ export default function CompanySettings() {
           <CardContent className="space-y-4">
             <div>
               <Label>{language === "ar" ? "رابط شعار الشركة (Logo URL)" : "Company Logo URL"}</Label>
-              <Input
-                value={form.logo_url}
-                onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
-                placeholder="https://example.com/logo.png"
-                dir="ltr"
-              />
+              <Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="https://example.com/logo.png" dir="ltr" />
             </div>
             {form.logo_url && (
               <div className="border border-border rounded-lg p-4 flex items-center justify-center bg-muted/30">
-                <img
-                  src={form.logo_url}
-                  alt="Company Logo Preview"
-                  className="max-h-20 max-w-full object-contain"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
+                <img src={form.logo_url} alt="Logo Preview" className="max-h-20 max-w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings2 className="h-5 w-5" />
+              {language === "ar" ? "الإعدادات المالية" : "Financial Settings"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>{language === "ar" ? "العملة الافتراضية" : "Default Currency"}</Label>
+              <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} placeholder="SAR" />
+            </div>
+            <div>
+              <Label>{language === "ar" ? "نسبة التأمينات الاجتماعية (%)" : "Social Insurance Rate (%)"}</Label>
+              <Input type="number" step="0.01" value={form.social_insurance_pct} onChange={(e) => setForm({ ...form, social_insurance_pct: e.target.value })} />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -104,9 +116,7 @@ export default function CompanySettings() {
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>
           <Save className="h-4 w-4 me-2" />
-          {saving
-            ? (language === "ar" ? "جاري الحفظ..." : "Saving...")
-            : (language === "ar" ? "حفظ الإعدادات" : "Save Settings")}
+          {saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ الإعدادات" : "Save Settings")}
         </Button>
       </div>
     </div>
