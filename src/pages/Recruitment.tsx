@@ -20,6 +20,7 @@ export default function Recruitment() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -39,30 +40,26 @@ export default function Recruitment() {
   useEffect(() => { fetchData(); }, []);
 
   const openAdd = () => { setEditingId(null); setForm({ title_ar: "", title_en: "", description_ar: "", description_en: "", department_id: "", requirements: "", closing_date: "" }); setDialogOpen(true); };
-
   const openEdit = (j: any) => {
     setEditingId(j.id);
-    setForm({
-      title_ar: j.title_ar || "", title_en: j.title_en || "",
-      description_ar: j.description_ar || "", description_en: j.description_en || "",
-      department_id: j.department_id || "", requirements: j.requirements || "", closing_date: j.closing_date || "",
-    });
+    setForm({ title_ar: j.title_ar || "", title_en: j.title_en || "", description_ar: j.description_ar || "", description_en: j.description_en || "", department_id: j.department_id || "", requirements: j.requirements || "", closing_date: j.closing_date || "" });
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
+    setSaving(true);
     const payload = { ...form, department_id: form.department_id || null, closing_date: form.closing_date || null, company_id: companyId };
     if (editingId) {
       const { error } = await supabase.from("job_postings").update(payload).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("job_postings").insert(payload);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم إضافة الوظيفة" : "Job posted");
     }
-    setDialogOpen(false); setEditingId(null); fetchData();
+    setSaving(false); setDialogOpen(false); setEditingId(null); fetchData();
   };
 
   const handleDelete = async () => {
@@ -103,7 +100,7 @@ export default function Recruitment() {
             <div><Label>{language === "ar" ? "الوصف" : "Description"}</Label><Textarea value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "المتطلبات" : "Requirements"}</Label><Textarea value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "تاريخ الإغلاق" : "Closing Date"}</Label><Input type="date" value={form.closing_date} onChange={(e) => setForm({ ...form, closing_date: e.target.value })} /></div>
-            <Button onClick={handleSave} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>

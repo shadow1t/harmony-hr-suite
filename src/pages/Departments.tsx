@@ -18,14 +18,14 @@ export default function Departments() {
   const [departments, setDepartments] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingDept, setSavingDept] = useState(false);
+  const [savingBranch, setSavingBranch] = useState(false);
 
-  // Dept state
   const [deptOpen, setDeptOpen] = useState(false);
   const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
   const [deleteDeptId, setDeleteDeptId] = useState<string | null>(null);
   const [deptForm, setDeptForm] = useState({ name_ar: "", name_en: "", description_ar: "", description_en: "" });
 
-  // Branch state
   const [branchOpen, setBranchOpen] = useState(false);
   const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
   const [deleteBranchId, setDeleteBranchId] = useState<string | null>(null);
@@ -44,22 +44,22 @@ export default function Departments() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // Department CRUD
   const openAddDept = () => { setEditingDeptId(null); setDeptForm({ name_ar: "", name_en: "", description_ar: "", description_en: "" }); setDeptOpen(true); };
   const openEditDept = (d: any) => { setEditingDeptId(d.id); setDeptForm({ name_ar: d.name_ar, name_en: d.name_en, description_ar: d.description_ar || "", description_en: d.description_en || "" }); setDeptOpen(true); };
 
   const saveDept = async () => {
     if (!deptForm.name_ar || !deptForm.name_en) { toast.error(language === "ar" ? "يرجى تعبئة الاسم" : "Name required"); return; }
+    setSavingDept(true);
     if (editingDeptId) {
       const { error } = await supabase.from("departments").update(deptForm).eq("id", editingDeptId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSavingDept(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("departments").insert({ ...deptForm, company_id: companyId });
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSavingDept(false); return; }
       toast.success(language === "ar" ? "تم إضافة القسم" : "Department added");
     }
-    setDeptOpen(false); setEditingDeptId(null); fetchData();
+    setSavingDept(false); setDeptOpen(false); setEditingDeptId(null); fetchData();
   };
 
   const confirmDeleteDept = async () => {
@@ -69,22 +69,22 @@ export default function Departments() {
     setDeleteDeptId(null);
   };
 
-  // Branch CRUD
   const openAddBranch = () => { setEditingBranchId(null); setBranchForm({ name_ar: "", name_en: "", city: "", address: "", phone: "" }); setBranchOpen(true); };
   const openEditBranch = (b: any) => { setEditingBranchId(b.id); setBranchForm({ name_ar: b.name_ar, name_en: b.name_en, city: b.city || "", address: b.address || "", phone: b.phone || "" }); setBranchOpen(true); };
 
   const saveBranch = async () => {
     if (!branchForm.name_ar || !branchForm.name_en) { toast.error(language === "ar" ? "يرجى تعبئة الاسم" : "Name required"); return; }
+    setSavingBranch(true);
     if (editingBranchId) {
       const { error } = await supabase.from("branches").update(branchForm).eq("id", editingBranchId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSavingBranch(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("branches").insert({ ...branchForm, company_id: companyId });
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSavingBranch(false); return; }
       toast.success(language === "ar" ? "تم إضافة الفرع" : "Branch added");
     }
-    setBranchOpen(false); setEditingBranchId(null); fetchData();
+    setSavingBranch(false); setBranchOpen(false); setEditingBranchId(null); fetchData();
   };
 
   const confirmDeleteBranch = async () => {
@@ -98,7 +98,6 @@ export default function Departments() {
     <div className="space-y-6">
       <h1 className="text-xl sm:text-2xl font-bold">{language === "ar" ? "الأقسام والفروع" : "Departments & Branches"}</h1>
 
-      {/* Department Dialog */}
       <Dialog open={deptOpen} onOpenChange={setDeptOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingDeptId ? (language === "ar" ? "تعديل القسم" : "Edit Department") : (language === "ar" ? "إضافة قسم" : "Add Department")}</DialogTitle></DialogHeader>
@@ -107,12 +106,11 @@ export default function Departments() {
             <div><Label>{language === "ar" ? "الاسم بالإنجليزي *" : "Name (EN) *"}</Label><Input value={deptForm.name_en} onChange={(e) => setDeptForm({ ...deptForm, name_en: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "الوصف بالعربي" : "Description (AR)"}</Label><Input value={deptForm.description_ar} onChange={(e) => setDeptForm({ ...deptForm, description_ar: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "الوصف بالإنجليزي" : "Description (EN)"}</Label><Input value={deptForm.description_en} onChange={(e) => setDeptForm({ ...deptForm, description_en: e.target.value })} /></div>
-            <Button onClick={saveDept} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={saveDept} disabled={savingDept} className="w-full">{savingDept ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Branch Dialog */}
       <Dialog open={branchOpen} onOpenChange={setBranchOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingBranchId ? (language === "ar" ? "تعديل الفرع" : "Edit Branch") : (language === "ar" ? "إضافة فرع" : "Add Branch")}</DialogTitle></DialogHeader>
@@ -122,12 +120,11 @@ export default function Departments() {
             <div><Label>{language === "ar" ? "المدينة" : "City"}</Label><Input value={branchForm.city} onChange={(e) => setBranchForm({ ...branchForm, city: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "العنوان" : "Address"}</Label><Input value={branchForm.address} onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "الهاتف" : "Phone"}</Label><Input value={branchForm.phone} onChange={(e) => setBranchForm({ ...branchForm, phone: e.target.value })} /></div>
-            <Button onClick={saveBranch} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={saveBranch} disabled={savingBranch} className="w-full">{savingBranch ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmations */}
       <ConfirmDialog open={!!deleteDeptId} onOpenChange={(o) => !o && setDeleteDeptId(null)}
         title={language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
         description={language === "ar" ? "هل أنت متأكد من حذف هذا القسم؟" : "Are you sure you want to delete this department?"}
@@ -140,7 +137,6 @@ export default function Departments() {
         onConfirm={confirmDeleteBranch} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Departments */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> {language === "ar" ? "الأقسام" : "Departments"}</CardTitle>
@@ -171,7 +167,6 @@ export default function Departments() {
           </CardContent>
         </Card>
 
-        {/* Branches */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> {language === "ar" ? "الفروع" : "Branches"}</CardTitle>

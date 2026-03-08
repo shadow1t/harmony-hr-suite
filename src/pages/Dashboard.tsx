@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,7 @@ interface StatCardProps {
   trend?: string;
 }
 
-function StatCard({ title, value, icon: Icon, trend }: StatCardProps) {
+const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(({ title, value, icon: Icon, trend }, ref) => {
   return (
     <Card>
       <CardContent className="p-3 sm:p-6">
@@ -39,7 +39,8 @@ function StatCard({ title, value, icon: Icon, trend }: StatCardProps) {
       </CardContent>
     </Card>
   );
-}
+});
+StatCard.displayName = "StatCard";
 
 interface ExpiryAlert {
   name: string;

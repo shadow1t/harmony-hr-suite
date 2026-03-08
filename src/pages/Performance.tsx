@@ -22,18 +22,18 @@ export default function Performance() {
   const [evaluations, setEvaluations] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // Cycle state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({ name_ar: "", name_en: "", start_date: "", end_date: "" });
 
-  // Evaluation state
   const [evalOpen, setEvalOpen] = useState(false);
   const [evalCycleId, setEvalCycleId] = useState<string | null>(null);
   const [evalForm, setEvalForm] = useState({ employee_id: "", score: "", comments: "", self_score: "", self_comments: "" });
   const [editingEvalId, setEditingEvalId] = useState<string | null>(null);
+  const [evalSaving, setEvalSaving] = useState(false);
   const [viewCycleId, setViewCycleId] = useState<string | null>(null);
   const [deleteEvalId, setDeleteEvalId] = useState<string | null>(null);
 
@@ -54,22 +54,22 @@ export default function Performance() {
 
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
 
-  // Cycle CRUD
   const openAdd = () => { setEditingId(null); setForm({ name_ar: "", name_en: "", start_date: "", end_date: "" }); setDialogOpen(true); };
   const openEdit = (c: any) => { setEditingId(c.id); setForm({ name_ar: c.name_ar || "", name_en: c.name_en || "", start_date: c.start_date || "", end_date: c.end_date || "" }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.name_ar || !form.start_date || !form.end_date) { toast.error(language === "ar" ? "يرجى تعبئة الحقول" : "Fill all fields"); return; }
+    setSaving(true);
     if (editingId) {
       const { error } = await supabase.from("evaluation_cycles").update(form).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("evaluation_cycles").insert({ ...form, company_id: companyId });
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم إنشاء الدورة" : "Cycle created");
     }
-    setDialogOpen(false); setEditingId(null); fetchData();
+    setSaving(false); setDialogOpen(false); setEditingId(null); fetchData();
   };
 
   const handleDeleteCycle = async () => {
@@ -80,7 +80,6 @@ export default function Performance() {
     setDeleteId(null);
   };
 
-  // Evaluation CRUD
   const openAddEval = (cycleId: string) => {
     setEvalCycleId(cycleId); setEditingEvalId(null);
     setEvalForm({ employee_id: "", score: "", comments: "", self_score: "", self_comments: "" });
@@ -89,35 +88,31 @@ export default function Performance() {
 
   const openEditEval = (ev: any) => {
     setEvalCycleId(ev.cycle_id); setEditingEvalId(ev.id);
-    setEvalForm({
-      employee_id: ev.employee_id, score: ev.score?.toString() || "",
-      comments: ev.comments || "", self_score: ev.self_score?.toString() || "", self_comments: ev.self_comments || "",
-    });
+    setEvalForm({ employee_id: ev.employee_id, score: ev.score?.toString() || "", comments: ev.comments || "", self_score: ev.self_score?.toString() || "", self_comments: ev.self_comments || "" });
     setEvalOpen(true);
   };
 
   const handleSaveEval = async () => {
     if (!evalForm.employee_id || !evalCycleId) { toast.error(language === "ar" ? "اختر الموظف" : "Select employee"); return; }
+    setEvalSaving(true);
     const payload = {
       cycle_id: evalCycleId, employee_id: evalForm.employee_id, company_id: companyId,
-      score: evalForm.score ? parseFloat(evalForm.score) : null,
-      comments: evalForm.comments || null,
-      self_score: evalForm.self_score ? parseFloat(evalForm.self_score) : null,
-      self_comments: evalForm.self_comments || null,
+      score: evalForm.score ? parseFloat(evalForm.score) : null, comments: evalForm.comments || null,
+      self_score: evalForm.self_score ? parseFloat(evalForm.self_score) : null, self_comments: evalForm.self_comments || null,
       status: evalForm.score ? "completed" : "pending",
     };
     if (editingEvalId) {
       const { error } = await supabase.from("evaluations").update(payload).eq("id", editingEvalId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setEvalSaving(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const exists = evaluations.find(e => e.cycle_id === evalCycleId && e.employee_id === evalForm.employee_id);
-      if (exists) { toast.error(language === "ar" ? "يوجد تقييم لهذا الموظف بالفعل" : "Evaluation already exists"); return; }
+      if (exists) { toast.error(language === "ar" ? "يوجد تقييم لهذا الموظف بالفعل" : "Evaluation already exists"); setEvalSaving(false); return; }
       const { error } = await supabase.from("evaluations").insert(payload);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setEvalSaving(false); return; }
       toast.success(language === "ar" ? "تم إضافة التقييم" : "Evaluation added");
     }
-    setEvalOpen(false); setEditingEvalId(null); fetchData();
+    setEvalSaving(false); setEvalOpen(false); setEditingEvalId(null); fetchData();
   };
 
   const handleDeleteEval = async () => {
@@ -142,7 +137,6 @@ export default function Performance() {
         <Button onClick={openAdd}><Plus className="h-4 w-4 me-2" />{language === "ar" ? "دورة تقييم جديدة" : "New Cycle"}</Button>
       </div>
 
-      {/* Cycle Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingId ? (language === "ar" ? "تعديل دورة التقييم" : "Edit Cycle") : (language === "ar" ? "دورة تقييم جديدة" : "New Evaluation Cycle")}</DialogTitle></DialogHeader>
@@ -153,12 +147,11 @@ export default function Performance() {
               <div><Label>{language === "ar" ? "تاريخ البدء *" : "Start *"}</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
               <div><Label>{language === "ar" ? "تاريخ الانتهاء *" : "End *"}</Label><Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} /></div>
             </div>
-            <Button onClick={handleSave} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Evaluation Dialog */}
       <Dialog open={evalOpen} onOpenChange={setEvalOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingEvalId ? (language === "ar" ? "تعديل التقييم" : "Edit Evaluation") : (language === "ar" ? "إضافة تقييم موظف" : "Add Evaluation")}</DialogTitle></DialogHeader>
@@ -176,12 +169,11 @@ export default function Performance() {
             </div>
             <div><Label>{language === "ar" ? "ملاحظات المقيّم" : "Evaluator Comments"}</Label><Textarea value={evalForm.comments} onChange={(e) => setEvalForm({ ...evalForm, comments: e.target.value })} /></div>
             <div><Label>{language === "ar" ? "ملاحظات الموظف" : "Self Comments"}</Label><Textarea value={evalForm.self_comments} onChange={(e) => setEvalForm({ ...evalForm, self_comments: e.target.value })} /></div>
-            <Button onClick={handleSaveEval} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={handleSaveEval} disabled={evalSaving} className="w-full">{evalSaving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* View Evaluations Dialog */}
       <Dialog open={!!viewCycleId} onOpenChange={(o) => !o && setViewCycleId(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{language === "ar" ? "التقييمات" : "Evaluations"}</DialogTitle></DialogHeader>
@@ -219,7 +211,6 @@ export default function Performance() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm Dialogs */}
       <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}
         title={language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
         description={language === "ar" ? "هل أنت متأكد من حذف دورة التقييم وجميع تقييماتها؟" : "Delete this cycle and all its evaluations?"}

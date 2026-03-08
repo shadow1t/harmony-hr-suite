@@ -22,15 +22,16 @@ export default function Training() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({ title_ar: "", title_en: "", description: "", trainer: "", start_date: "", end_date: "", max_participants: "" });
 
-  // Enrollment state
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [enrollCourseId, setEnrollCourseId] = useState<string | null>(null);
   const [enrollEmployeeId, setEnrollEmployeeId] = useState("");
+  const [enrollSaving, setEnrollSaving] = useState(false);
   const [viewCourseId, setViewCourseId] = useState<string | null>(null);
   const [deleteEnrollId, setDeleteEnrollId] = useState<string | null>(null);
 
@@ -51,7 +52,6 @@ export default function Training() {
 
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
 
-  // Course CRUD
   const openAdd = () => { setEditingId(null); setForm({ title_ar: "", title_en: "", description: "", trainer: "", start_date: "", end_date: "", max_participants: "" }); setDialogOpen(true); };
   const openEdit = (c: any) => {
     setEditingId(c.id);
@@ -61,17 +61,18 @@ export default function Training() {
 
   const handleSave = async () => {
     if (!form.title_ar) { toast.error(language === "ar" ? "يرجى إدخال العنوان" : "Title required"); return; }
+    setSaving(true);
     const payload = { ...form, company_id: companyId, max_participants: form.max_participants ? parseInt(form.max_participants) : null, start_date: form.start_date || null, end_date: form.end_date || null };
     if (editingId) {
       const { error } = await supabase.from("training_courses").update(payload).eq("id", editingId);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم التحديث" : "Updated");
     } else {
       const { error } = await supabase.from("training_courses").insert(payload);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(error.message); setSaving(false); return; }
       toast.success(language === "ar" ? "تم إضافة الدورة" : "Course added");
     }
-    setDialogOpen(false); setEditingId(null); fetchData();
+    setSaving(false); setDialogOpen(false); setEditingId(null); fetchData();
   };
 
   const handleDelete = async () => {
@@ -82,16 +83,17 @@ export default function Training() {
     setDeleteId(null);
   };
 
-  // Enrollment
   const openEnroll = (courseId: string) => { setEnrollCourseId(courseId); setEnrollEmployeeId(""); setEnrollOpen(true); };
 
   const handleEnroll = async () => {
     if (!enrollEmployeeId || !enrollCourseId) { toast.error(language === "ar" ? "اختر الموظف" : "Select employee"); return; }
     const exists = enrollments.find(e => e.course_id === enrollCourseId && e.employee_id === enrollEmployeeId);
     if (exists) { toast.error(language === "ar" ? "الموظف مسجل بالفعل" : "Already enrolled"); return; }
+    setEnrollSaving(true);
     const { error } = await supabase.from("training_enrollments").insert({ course_id: enrollCourseId, employee_id: enrollEmployeeId, company_id: companyId });
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم التسجيل" : "Enrolled"); setEnrollOpen(false); fetchData(); }
+    setEnrollSaving(false);
   };
 
   const handleDeleteEnroll = async () => {
@@ -112,7 +114,6 @@ export default function Training() {
         <Button onClick={openAdd}><Plus className="h-4 w-4 me-2" />{language === "ar" ? "دورة جديدة" : "New Course"}</Button>
       </div>
 
-      {/* Course Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingId ? (language === "ar" ? "تعديل الدورة" : "Edit Course") : (language === "ar" ? "إضافة دورة تدريبية" : "Add Training Course")}</DialogTitle></DialogHeader>
@@ -126,12 +127,11 @@ export default function Training() {
               <div><Label>{language === "ar" ? "تاريخ الانتهاء" : "End"}</Label><Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} /></div>
             </div>
             <div><Label>{language === "ar" ? "الحد الأقصى" : "Max Participants"}</Label><Input type="number" value={form.max_participants} onChange={(e) => setForm({ ...form, max_participants: e.target.value })} /></div>
-            <Button onClick={handleSave} className="w-full">{language === "ar" ? "حفظ" : "Save"}</Button>
+            <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? (language === "ar" ? "جاري الحفظ..." : "Saving...") : (language === "ar" ? "حفظ" : "Save")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Enroll Dialog */}
       <Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{language === "ar" ? "تسجيل موظف في الدورة" : "Enroll Employee"}</DialogTitle></DialogHeader>
@@ -143,12 +143,11 @@ export default function Training() {
                 <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.employee_number} - {empName(e)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button onClick={handleEnroll} className="w-full">{language === "ar" ? "تسجيل" : "Enroll"}</Button>
+            <Button onClick={handleEnroll} disabled={enrollSaving} className="w-full">{enrollSaving ? (language === "ar" ? "جاري التسجيل..." : "Enrolling...") : (language === "ar" ? "تسجيل" : "Enroll")}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* View Enrollments Dialog */}
       <Dialog open={!!viewCourseId} onOpenChange={(o) => !o && setViewCourseId(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{language === "ar" ? "المسجلين في الدورة" : "Course Enrollments"}</DialogTitle></DialogHeader>
