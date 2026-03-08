@@ -148,6 +148,7 @@ export default function Employees() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      <PageBreadcrumb />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={Users} label={language === "ar" ? "إجمالي الموظفين" : "Total Employees"} value={employees.length} />
         <StatCard icon={Users} label={language === "ar" ? "نشط" : "Active"} value={activeCount} color="text-green-600" />
