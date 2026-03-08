@@ -75,7 +75,8 @@ export default function Payroll() {
     else { toast.success(language === "ar" ? "تم إنشاء مسيّر الرواتب" : "Payroll generated"); fetchData(); }
   };
 
-  const updateSingleStatus = async (id: string, newStatus: string) => {
+  type PayrollStatus = "draft" | "processing" | "completed" | "paid";
+  const updateSingleStatus = async (id: string, newStatus: PayrollStatus) => {
     const { error } = await supabase.from("payroll").update({ status: newStatus }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success(language === "ar" ? "تم التحديث" : "Updated"); fetchData(); }
