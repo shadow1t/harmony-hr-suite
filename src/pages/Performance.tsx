@@ -14,6 +14,7 @@ import { Plus, TrendingUp, Target } from "lucide-react";
 
 export default function Performance() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [cycles, setCycles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
