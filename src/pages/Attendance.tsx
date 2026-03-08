@@ -14,7 +14,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
-import { Plus, Clock, Pencil, Trash2 } from "lucide-react";
+import { Plus, Clock, Pencil, Trash2, Users, UserX, AlertTriangle } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 export default function Attendance() {
   const { language } = useLanguage();
