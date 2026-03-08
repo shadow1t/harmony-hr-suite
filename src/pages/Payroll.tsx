@@ -12,6 +12,7 @@ import { Wallet, Play, DollarSign } from "lucide-react";
 
 export default function Payroll() {
   const { language } = useLanguage();
+  const { companyId } = useCompany();
   const [payrolls, setPayrolls] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
