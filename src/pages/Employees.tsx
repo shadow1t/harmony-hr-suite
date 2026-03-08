@@ -139,12 +139,21 @@ export default function Employees() {
     return <Badge variant={s.variant}>{s.label}</Badge>;
   };
 
+  const activeCount = employees.filter(e => e.status === "active").length;
+  const onLeaveCount = employees.filter(e => e.status === "on_leave").length;
+  const terminatedCount = employees.filter(e => e.status === "terminated").length;
+
   return (
     <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard icon={Users} label={language === "ar" ? "إجمالي الموظفين" : "Total Employees"} value={employees.length} />
+        <StatCard icon={Users} label={language === "ar" ? "نشط" : "Active"} value={activeCount} color="text-green-600" />
+        <StatCard icon={Users} label={language === "ar" ? "في إجازة" : "On Leave"} value={onLeaveCount} color="text-yellow-600" />
+        <StatCard icon={Users} label={language === "ar" ? "منتهي الخدمة" : "Terminated"} value={terminatedCount} color="text-destructive" />
+      </div>
       <div className="flex flex-col gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">{t("employees.title")}</h1>
-          <p className="text-muted-foreground flex items-center gap-1 text-sm"><Users className="h-4 w-4" /> {filtered.length} {language === "ar" ? "موظف" : "employees"}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={handleExportCSV}><Download className="h-4 w-4 me-2" />{language === "ar" ? "تصدير CSV" : "Export CSV"}</Button>
