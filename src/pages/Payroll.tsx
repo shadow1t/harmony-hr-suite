@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
-import { Wallet, Play, DollarSign, Download } from "lucide-react";
+import { Wallet, Play, DollarSign, Download, Trash2, ArrowRight } from "lucide-react";
 
 function exportCSV(data: any[], filename: string) {
   if (!data.length) return;
@@ -21,6 +22,8 @@ function exportCSV(data: any[], filename: string) {
   URL.revokeObjectURL(url);
 }
 
+const statusFlow: Record<string, string> = { draft: "processing", processing: "completed", completed: "paid" };
+
 export default function Payroll() {
   const { language } = useLanguage();
   const { companyId, company } = useCompany();
@@ -29,6 +32,8 @@ export default function Payroll() {
   const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [bulkStatusAction, setBulkStatusAction] = useState<string | null>(null);
 
   const currency = company?.currency || "SAR";
   const insurancePct = company?.social_insurance_pct ?? 9.75;
@@ -70,6 +75,32 @@ export default function Payroll() {
     else { toast.success(language === "ar" ? "تم إنشاء مسيّر الرواتب" : "Payroll generated"); fetchData(); }
   };
 
+  const updateSingleStatus = async (id: string, newStatus: string) => {
+    const { error } = await supabase.from("payroll").update({ status: newStatus }).eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success(language === "ar" ? "تم التحديث" : "Updated"); fetchData(); }
+  };
+
+  const updateBulkStatus = async () => {
+    if (!bulkStatusAction) return;
+    const currentStatus = Object.entries(statusFlow).find(([, v]) => v === bulkStatusAction)?.[0];
+    if (!currentStatus) return;
+    const ids = payrolls.filter(p => p.status === currentStatus).map(p => p.id);
+    if (ids.length === 0) { toast.error(language === "ar" ? "لا توجد سجلات للتحديث" : "No records to update"); setBulkStatusAction(null); return; }
+    const { error } = await supabase.from("payroll").update({ status: bulkStatusAction }).in("id", ids);
+    if (error) toast.error(error.message);
+    else { toast.success(language === "ar" ? `تم تحديث ${ids.length} سجل` : `Updated ${ids.length} records`); fetchData(); }
+    setBulkStatusAction(null);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("payroll").delete().eq("id", deleteId);
+    if (error) toast.error(error.message);
+    else { toast.success(language === "ar" ? "تم الحذف" : "Deleted"); fetchData(); }
+    setDeleteId(null);
+  };
+
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
   const totalNet = payrolls.reduce((sum, p) => sum + (Number(p.net_salary) || 0), 0);
 
@@ -86,6 +117,31 @@ export default function Payroll() {
   const months = language === "ar"
     ? ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
     : ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  const statusLabel = (s: string) => {
+    const map: Record<string, { ar: string; en: string; v: "default" | "secondary" | "outline" | "destructive" }> = {
+      draft: { ar: "مسودة", en: "Draft", v: "secondary" },
+      processing: { ar: "قيد المعالجة", en: "Processing", v: "outline" },
+      completed: { ar: "مكتمل", en: "Completed", v: "default" },
+      paid: { ar: "مدفوع", en: "Paid", v: "default" },
+    };
+    const item = map[s] || { ar: s, en: s, v: "outline" as const };
+    return <Badge variant={item.v}>{language === "ar" ? item.ar : item.en}</Badge>;
+  };
+
+  const nextStatusLabel = (current: string) => {
+    const next = statusFlow[current];
+    if (!next) return null;
+    const labels: Record<string, { ar: string; en: string }> = {
+      processing: { ar: "بدء المعالجة", en: "Process" },
+      completed: { ar: "إكمال", en: "Complete" },
+      paid: { ar: "تأكيد الدفع", en: "Mark Paid" },
+    };
+    return labels[next] || null;
+  };
+
+  // Count by status
+  const statusCounts = payrolls.reduce<Record<string, number>>((acc, p) => { acc[p.status] = (acc[p.status] || 0) + 1; return acc; }, {});
 
   return (
     <div className="space-y-6">
@@ -108,21 +164,67 @@ export default function Payroll() {
       </div>
 
       {payrolls.length > 0 && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <DollarSign className="h-8 w-8 text-primary" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <DollarSign className="h-8 w-8 text-primary shrink-0" />
               <div>
-                <p className="text-sm text-muted-foreground">{language === "ar" ? "إجمالي صافي الرواتب" : "Total Net Payroll"}</p>
-                <p className="text-2xl font-bold">{totalNet.toLocaleString()} {currency}</p>
+                <p className="text-xs text-muted-foreground">{language === "ar" ? "إجمالي الصافي" : "Total Net"}</p>
+                <p className="text-lg font-bold">{totalNet.toLocaleString()} {currency}</p>
               </div>
-              <div className="ms-auto text-sm text-muted-foreground">
-                {language === "ar" ? `نسبة التأمينات: ${insurancePct}%` : `Insurance: ${insurancePct}%`}
-              </div>
+            </CardContent>
+          </Card>
+          {Object.entries(statusCounts).map(([status, count]) => (
+            <Card key={status}>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground mb-1">{statusLabel(status)}</p>
+                <p className="text-lg font-bold">{count} {language === "ar" ? "موظف" : "employees"}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Bulk status actions */}
+      {payrolls.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-medium mb-3">{language === "ar" ? "تحديث جماعي للحالة" : "Bulk Status Update"}</p>
+            <div className="flex gap-2 flex-wrap">
+              {statusCounts["draft"] && (
+                <Button size="sm" variant="outline" onClick={() => setBulkStatusAction("processing")}>
+                  <ArrowRight className="h-4 w-4 me-1" />
+                  {language === "ar" ? `معالجة الكل (${statusCounts["draft"]})` : `Process All (${statusCounts["draft"]})`}
+                </Button>
+              )}
+              {statusCounts["processing"] && (
+                <Button size="sm" variant="outline" onClick={() => setBulkStatusAction("completed")}>
+                  <ArrowRight className="h-4 w-4 me-1" />
+                  {language === "ar" ? `إكمال الكل (${statusCounts["processing"]})` : `Complete All (${statusCounts["processing"]})`}
+                </Button>
+              )}
+              {statusCounts["completed"] && (
+                <Button size="sm" variant="outline" onClick={() => setBulkStatusAction("paid")}>
+                  <ArrowRight className="h-4 w-4 me-1" />
+                  {language === "ar" ? `تأكيد دفع الكل (${statusCounts["completed"]})` : `Mark All Paid (${statusCounts["completed"]})`}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       )}
+
+      <ConfirmDialog open={!!bulkStatusAction} onOpenChange={(o) => !o && setBulkStatusAction(null)}
+        title={language === "ar" ? "تأكيد التحديث الجماعي" : "Confirm Bulk Update"}
+        description={language === "ar" ? "هل تريد تحديث حالة جميع السجلات المؤهلة؟" : "Update status of all eligible records?"}
+        confirmLabel={language === "ar" ? "تحديث" : "Update"} cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
+        variant="default" onConfirm={updateBulkStatus} />
+
+      <ConfirmDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}
+        title={language === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
+        description={language === "ar" ? "هل أنت متأكد من حذف هذا السجل؟" : "Are you sure you want to delete this record?"}
+        confirmLabel={language === "ar" ? "حذف" : "Delete"} cancelLabel={language === "ar" ? "إلغاء" : "Cancel"}
+        onConfirm={handleDelete} />
 
       <Card>
         <CardContent className="pt-6">
@@ -133,7 +235,7 @@ export default function Payroll() {
             </div>
           ) : (
             <div className="overflow-x-auto -mx-6 px-6">
-              <div className="min-w-[700px]">
+              <div className="min-w-[800px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -143,19 +245,33 @@ export default function Payroll() {
                       <TableHead>{language === "ar" ? "التأمينات" : "Insurance"}</TableHead>
                       <TableHead>{language === "ar" ? "الصافي" : "Net"}</TableHead>
                       <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                      <TableHead className="w-28">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {payrolls.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{p.employees ? empName(p.employees) : "-"}</TableCell>
-                        <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
-                        <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
-                        <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
-                        <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
-                        <TableCell><Badge variant={p.status === "paid" ? "default" : "secondary"}>{p.status}</Badge></TableCell>
-                      </TableRow>
-                    ))}
+                    {payrolls.map((p) => {
+                      const next = nextStatusLabel(p.status);
+                      return (
+                        <TableRow key={p.id}>
+                          <TableCell className="font-medium">{p.employees ? empName(p.employees) : "-"}</TableCell>
+                          <TableCell>{Number(p.basic_salary).toLocaleString()}</TableCell>
+                          <TableCell>{(Number(p.housing_allowance) + Number(p.transport_allowance) + Number(p.other_allowances)).toLocaleString()}</TableCell>
+                          <TableCell className="text-destructive">-{Number(p.social_insurance).toLocaleString()}</TableCell>
+                          <TableCell className="font-bold">{Number(p.net_salary).toLocaleString()} {currency}</TableCell>
+                          <TableCell>{statusLabel(p.status)}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {next && (
+                                <Button variant="ghost" size="sm" onClick={() => updateSingleStatus(p.id, statusFlow[p.status])}>
+                                  <ArrowRight className="h-4 w-4 me-1" />{language === "ar" ? next.ar : next.en}
+                                </Button>
+                              )}
+                              <Button variant="ghost" size="icon" onClick={() => setDeleteId(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
