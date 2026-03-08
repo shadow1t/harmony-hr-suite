@@ -75,7 +75,7 @@ export default function MyLeaves() {
     const { error } = await supabase.from("leave_requests").insert({
       employee_id: employeeId,
       company_id: companyId,
-      leave_type: form.leave_type,
+      leave_type: form.leave_type as "annual" | "sick" | "emergency" | "unpaid" | "maternity" | "paternity",
       start_date: form.start_date,
       end_date: form.end_date,
       days_count: days,
