@@ -89,8 +89,18 @@ export default function Attendance() {
   const empName = (emp: any) => language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`;
   const statusColor = (s: string) => { if (s === "present") return "default"; if (s === "late") return "secondary"; if (s === "absent") return "destructive"; return "outline"; };
 
+  const presentCount = records.filter(r => r.status === "present").length;
+  const absentCount = records.filter(r => r.status === "absent").length;
+  const lateCount = records.filter(r => r.status === "late").length;
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard icon={Users} label={language === "ar" ? "إجمالي السجلات" : "Total Records"} value={records.length} />
+        <StatCard icon={Clock} label={language === "ar" ? "حاضر" : "Present"} value={presentCount} color="text-green-600" />
+        <StatCard icon={UserX} label={language === "ar" ? "غائب" : "Absent"} value={absentCount} color="text-destructive" />
+        <StatCard icon={AlertTriangle} label={language === "ar" ? "متأخر" : "Late"} value={lateCount} color="text-yellow-600" />
+      </div>
       <div className="flex flex-col gap-3">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><Clock className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "الحضور والانصراف" : "Attendance"}</h1>
         <div className="flex items-center gap-2 flex-wrap">

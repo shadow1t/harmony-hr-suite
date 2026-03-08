@@ -97,6 +97,10 @@ export default function Departments() {
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-3">
+        <StatCard icon={Building2} label={language === "ar" ? "الأقسام" : "Departments"} value={departments.length} />
+        <StatCard icon={GitBranch} label={language === "ar" ? "الفروع" : "Branches"} value={branches.length} />
+      </div>
       <h1 className="text-xl sm:text-2xl font-bold">{language === "ar" ? "الأقسام والفروع" : "Departments & Branches"}</h1>
 
       <Dialog open={deptOpen} onOpenChange={setDeptOpen}>

@@ -131,8 +131,19 @@ export default function Performance() {
     return (evals.reduce((s, e) => s + Number(e.score), 0) / evals.length).toFixed(1);
   };
 
+  const completedEvals = evaluations.filter(e => e.status === "completed").length;
+  const pendingEvals = evaluations.filter(e => e.status === "pending").length;
+  const allScores = evaluations.filter(e => e.score).map(e => Number(e.score));
+  const avgAllScore = allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(1) : "-";
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard icon={Target} label={language === "ar" ? "دورات التقييم" : "Cycles"} value={cycles.length} />
+        <StatCard icon={ClipboardCheck} label={language === "ar" ? "تقييمات مكتملة" : "Completed"} value={completedEvals} color="text-green-600" />
+        <StatCard icon={Users} label={language === "ar" ? "تقييمات معلقة" : "Pending"} value={pendingEvals} color="text-yellow-600" />
+        <StatCard icon={BarChart3} label={language === "ar" ? "متوسط الدرجات" : "Avg Score"} value={avgAllScore} color="text-primary" />
+      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><TrendingUp className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "تقييم الأداء" : "Performance"}</h1>
         <Button onClick={openAdd}><Plus className="h-4 w-4 me-2" />{language === "ar" ? "دورة تقييم جديدة" : "New Cycle"}</Button>

@@ -15,6 +15,7 @@ import { TablePagination } from "@/components/ui/table-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
 import { Plus, Search, Users, Download, Pencil, Trash2 } from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
 
 function exportCSV(data: any[], filename: string) {
   if (!data.length) return;

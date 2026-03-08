@@ -100,8 +100,18 @@ export default function Leaves() {
     return <Badge variant={item.v as any}>{language === "ar" ? item.ar : item.en}</Badge>;
   };
 
+  const pendingCount = requests.filter(r => r.status === "pending").length;
+  const approvedCount = requests.filter(r => r.status === "approved").length;
+  const rejectedCount = requests.filter(r => r.status === "rejected").length;
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard icon={CalendarDays} label={language === "ar" ? "إجمالي الطلبات" : "Total Requests"} value={requests.length} />
+        <StatCard icon={Clock} label={language === "ar" ? "معلق" : "Pending"} value={pendingCount} color="text-yellow-600" />
+        <StatCard icon={CheckCircle} label={language === "ar" ? "مقبول" : "Approved"} value={approvedCount} color="text-green-600" />
+        <StatCard icon={XCircle} label={language === "ar" ? "مرفوض" : "Rejected"} value={rejectedCount} color="text-destructive" />
+      </div>
       <div className="flex flex-col gap-3">
         <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><CalendarDays className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "إدارة الإجازات" : "Leave Management"}</h1>
         <div className="flex items-center gap-2 flex-wrap">
