@@ -91,6 +91,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { t } = useLanguage();
+  const { company, isSuperAdmin } = useCompany();
 
   return (
     <Sidebar collapsible="icon">
