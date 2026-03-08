@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import { Plus, GraduationCap, Calendar, Pencil, Trash2, UserPlus, Users, BookOpen } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { PageBreadcrumb } from "@/components/ui/page-breadcrumb";
 
 export default function Training() {
   const { language } = useLanguage();
@@ -113,6 +114,7 @@ export default function Training() {
 
   return (
     <div className="space-y-6">
+      <PageBreadcrumb />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={BookOpen} label={language === "ar" ? "الدورات" : "Courses"} value={courses.length} />
         <StatCard icon={Calendar} label={language === "ar" ? "مجدولة" : "Scheduled"} value={scheduledCourses} color="text-yellow-600" />

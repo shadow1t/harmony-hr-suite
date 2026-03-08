@@ -37,6 +37,7 @@ import MyPortal from "./pages/employee/MyPortal";
 import MyAttendance from "./pages/employee/MyAttendance";
 import MyLeaves from "./pages/employee/MyLeaves";
 import MyPayslips from "./pages/employee/MyPayslips";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,7 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
                 {/* HR/Admin routes */}
                 <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />

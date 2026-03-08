@@ -16,6 +16,8 @@ import { usePagination } from "@/hooks/usePagination";
 import { toast } from "sonner";
 import { Plus, Search, Users, Download, Pencil, Trash2 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { PageBreadcrumb } from "@/components/ui/page-breadcrumb";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function exportCSV(data: any[], filename: string) {
   if (!data.length) return;
@@ -146,6 +148,7 @@ export default function Employees() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      <PageBreadcrumb />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={Users} label={language === "ar" ? "إجمالي الموظفين" : "Total Employees"} value={employees.length} />
         <StatCard icon={Users} label={language === "ar" ? "نشط" : "Active"} value={activeCount} color="text-green-600" />
@@ -234,10 +237,11 @@ export default function Employees() {
           {loading ? (
             <p className="text-center py-8 text-muted-foreground">{t("app.loading")}</p>
           ) : filtered.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">{t("common.noData")}</p>
+            <EmptyState icon={Users} title={t("common.noData")} description={language === "ar" ? "أضف موظفين للبدء" : "Add employees to get started"} actionLabel={t("employees.addNew")} onAction={openAdd} />
           ) : (
             <>
-              <div className="overflow-x-auto -mx-6 px-6">
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto -mx-6 px-6">
                 <div className="min-w-[800px]">
                   <Table>
                     <TableHeader>
@@ -274,6 +278,30 @@ export default function Employees() {
                   </Table>
                 </div>
               </div>
+
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-3">
+                {pagination.items.map((emp: any) => (
+                  <div key={emp.id} className="border rounded-lg p-3 space-y-2 bg-card">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">{language === "ar" ? `${emp.first_name_ar} ${emp.last_name_ar}` : `${emp.first_name_en || emp.first_name_ar} ${emp.last_name_en || emp.last_name_ar}`}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{emp.employee_number}</p>
+                      </div>
+                      {statusBadge(emp.status)}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div><span className="text-muted-foreground">{t("employees.department")}</span><p className="font-medium">{emp.departments ? (language === "ar" ? emp.departments.name_ar : emp.departments.name_en) : "-"}</p></div>
+                      <div><span className="text-muted-foreground">{t("employees.position")}</span><p className="font-medium">{language === "ar" ? emp.position_ar : (emp.position_en || emp.position_ar) || "-"}</p></div>
+                    </div>
+                    <div className="flex gap-1 pt-1 border-t">
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(emp)}><Pencil className="h-3.5 w-3.5 me-1" />{language === "ar" ? "تعديل" : "Edit"}</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteId(emp.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5 me-1" />{language === "ar" ? "حذف" : "Delete"}</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <TablePagination {...pagination} language={language} />
             </>
           )}
