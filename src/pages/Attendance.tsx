@@ -57,14 +57,12 @@ export default function Attendance() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Clock className="h-6 w-6" /> {language === "ar" ? "الحضور والانصراف" : "Attendance"}</h1>
-        </div>
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2"><Clock className="h-5 w-5 sm:h-6 sm:w-6" /> {language === "ar" ? "الحضور والانصراف" : "Attendance"}</h1>
+        <div className="flex items-center gap-2 flex-wrap">
           <Input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="w-auto" />
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 me-2" />{language === "ar" ? "تسجيل حضور" : "Record"}</Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 me-2" />{language === "ar" ? "تسجيل حضور" : "Record"}</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>{language === "ar" ? "تسجيل حضور" : "Record Attendance"}</DialogTitle></DialogHeader>
               <div className="space-y-3">
