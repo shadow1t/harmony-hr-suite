@@ -96,7 +96,16 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
-        <Button variant="ghost" size="icon" onClick={() => { const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true }); document.dispatchEvent(event); }} title="⌘K" className="h-8 w-8 sm:h-9 sm:w-9 hidden sm:flex">
+        <Button
+          variant="outline"
+          onClick={() => { const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true }); document.dispatchEvent(event); }}
+          className="hidden sm:flex items-center gap-2 h-8 sm:h-9 px-3 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span className="text-xs">{language === "ar" ? "بحث..." : "Search..."}</span>
+          <kbd className="pointer-events-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] ms-2">⌘K</kbd>
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => { const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true }); document.dispatchEvent(event); }} className="h-8 w-8 sm:hidden">
           <Search className="h-4 w-4" />
         </Button>
 
