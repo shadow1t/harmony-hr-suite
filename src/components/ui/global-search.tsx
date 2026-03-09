@@ -138,16 +138,20 @@ export function GlobalSearch() {
         value={query}
         onValueChange={setQuery}
       />
-      <CommandList className="max-h-[400px]">
+      <CommandList className="max-h-[380px] scrollbar-thin">
         <CommandEmpty>
-          <div className="flex flex-col items-center gap-2 py-4">
-            <Search className="h-8 w-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              {isAr ? "لا توجد نتائج" : "No results found"}
-            </p>
-            <p className="text-xs text-muted-foreground/70">
-              {isAr ? "جرب كلمات بحث مختلفة" : "Try different search terms"}
-            </p>
+          <div className="flex flex-col items-center gap-3 py-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Search className="h-5 w-5 text-muted-foreground/50" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-muted-foreground">
+                {isAr ? "لا توجد نتائج" : "No results found"}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                {isAr ? "جرب كلمات بحث مختلفة" : "Try different search terms"}
+              </p>
+            </div>
           </div>
         </CommandEmpty>
 
@@ -156,11 +160,11 @@ export function GlobalSearch() {
           <CommandGroup heading={isAr ? "إجراءات سريعة" : "Quick Actions"}>
             {quickActions.map((action) => (
               <CommandItem key={action.path + action.labelEn} onSelect={() => handleSelect(action.path)} className="gap-3 cursor-pointer">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
-                  <action.icon className="h-4 w-4 text-primary" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 shrink-0">
+                  <action.icon className="h-3.5 w-3.5 text-primary" />
                 </div>
-                <span className="flex-1">{isAr ? action.labelAr : action.labelEn}</span>
-                <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                <span className="flex-1 text-sm">{isAr ? action.labelAr : action.labelEn}</span>
+                <ArrowRight className="h-3 w-3 text-muted-foreground/40" />
               </CommandItem>
             ))}
           </CommandGroup>
@@ -175,12 +179,10 @@ export function GlobalSearch() {
               className="gap-3 cursor-pointer"
               keywords={[page.labelAr, page.labelEn, ...page.keywords]}
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
-                <page.icon className="h-4 w-4 text-foreground" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted shrink-0">
+                <page.icon className="h-3.5 w-3.5 text-muted-foreground" />
               </div>
-              <div className="flex flex-col">
-                <span>{isAr ? page.labelAr : page.labelEn}</span>
-              </div>
+              <span className="text-sm">{isAr ? page.labelAr : page.labelEn}</span>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -188,20 +190,20 @@ export function GlobalSearch() {
         {/* Employees */}
         {filteredEmployees.length > 0 && (
           <>
-            <CommandSeparator />
+            <CommandSeparator className="my-1" />
             <CommandGroup heading={isAr ? "الموظفون" : "Employees"}>
               {filteredEmployees.map((emp) => (
                 <CommandItem key={emp.id} onSelect={() => handleSelect("/employees")} className="gap-3 cursor-pointer">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent">
-                    <User className="h-4 w-4 text-accent-foreground" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <User className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="truncate font-medium">{emp.name}</span>
-                    <span className="text-xs text-muted-foreground truncate">
-                      {emp.employee_number} {emp.position && `• ${emp.position}`}
+                  <div className="flex flex-col flex-1 min-w-0 gap-0.5">
+                    <span className="truncate text-sm font-medium">{emp.name}</span>
+                    <span className="text-[11px] text-muted-foreground/70 truncate">
+                      {emp.employee_number}{emp.position && ` · ${emp.position}`}
                     </span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] shrink-0">
+                  <Badge variant="secondary" className="text-[10px] shrink-0 font-normal px-1.5 py-0">
                     {isAr ? "موظف" : "Employee"}
                   </Badge>
                 </CommandItem>
@@ -213,15 +215,15 @@ export function GlobalSearch() {
         {/* Departments */}
         {filteredDepartments.length > 0 && (
           <>
-            <CommandSeparator />
+            <CommandSeparator className="my-1" />
             <CommandGroup heading={isAr ? "الأقسام" : "Departments"}>
               {filteredDepartments.map((dept) => (
                 <CommandItem key={dept.id} onSelect={() => handleSelect("/departments")} className="gap-3 cursor-pointer">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
-                    <Briefcase className="h-4 w-4" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted shrink-0">
+                    <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
-                  <span className="flex-1">{dept.name}</span>
-                  <Badge variant="outline" className="text-[10px] shrink-0">
+                  <span className="flex-1 text-sm">{dept.name}</span>
+                  <Badge variant="secondary" className="text-[10px] shrink-0 font-normal px-1.5 py-0">
                     {isAr ? "قسم" : "Dept"}
                   </Badge>
                 </CommandItem>
@@ -232,15 +234,19 @@ export function GlobalSearch() {
       </CommandList>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <kbd className="pointer-events-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">↑↓</kbd>
-          <span>{isAr ? "تنقل" : "Navigate"}</span>
-          <kbd className="pointer-events-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">↵</kbd>
-          <span>{isAr ? "اختيار" : "Select"}</span>
+      <div className="flex items-center justify-between border-t border-border/50 bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground/70">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <kbd className="rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-sm">↑↓</kbd>
+            <span>{isAr ? "تنقل" : "Navigate"}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <kbd className="rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-sm">↵</kbd>
+            <span>{isAr ? "اختيار" : "Select"}</span>
+          </div>
         </div>
         <div className="flex items-center gap-1">
-          <kbd className="pointer-events-none rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">ESC</kbd>
+          <kbd className="rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-sm">ESC</kbd>
           <span>{isAr ? "إغلاق" : "Close"}</span>
         </div>
       </div>
